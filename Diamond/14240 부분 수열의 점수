@@ -1,0 +1,97 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+typedef long long ll;
+
+
+struct line {  
+   mutable ll m, k, p;  
+   bool operator<(const line &o) const { return m < o.m; }  
+   bool operator<(ll x) const { return p < x; }  
+};
+
+struct LineContainer : multiset<line, less<>> {  
+   //(for doubles, use inf = 1/.0, div(a,b) = a/b)  
+   const static ll inf = LLONG_MAX;  
+
+   ll div(ll a, ll b) { 
+      return a / b - ((a ^ b) < 0 && a % b); 
+   } 
+
+   bool isect(iterator x, iterator y) {  
+      if (y == end()) return x->p = inf, 0;  
+      if (x->m == y->m) x->p = x->k > y->k ? inf : -inf;  
+      else x->p = div(y->k - x->k, x->m - y->m);  
+      return x->p >= y->p;  
+   }  
+
+   void add(ll m, ll k) { //add y = mx + k  
+      auto z = insert({m, k}), y = z++, x = y;  
+      while (isect(y, z)) z = erase(z);  
+      if (x != begin() && isect(--x, y)) isect(x, y = erase(y));  
+      while ((y = x) != begin() && (--x)->p >= y->p) isect(x, erase(y));  
+   }  
+
+   ll query(ll x) {  
+      auto l = *lower_bound(x);  
+      return l.m * x + l.k;  
+   }  
+} cht;
+
+int main() {
+   ios_base::sync_with_stdio(false);
+   cin.tie(0);
+   cout.tie(0);
+
+   ll n;
+   cin >> n;
+   vector<ll> nums(n);
+   for (ll i = 0; i < n; i++){
+      cin >> nums[i];
+   }
+
+   if (n == 1){
+      ll answer = nums[0];
+      if (answer < 0){
+         answer = 0;
+      }
+      cout << answer;
+      exit(0);
+   }
+
+   vector<ll> s(n);
+   ll temp = 0;
+   for (ll i = 0; i < n; i++){
+      temp += nums[i];
+      s[i] = temp;
+   }
+
+   vector<ll> si(n);
+   temp = 0;
+   for (ll i = 0; i < n; i++){
+      temp += nums[i] * (i + 1);
+      si[i] = temp;
+   }
+
+   vector<ll> dp(n);
+   cht.add(0, 0);
+   ll tmp;
+   ll answer = nums[0];
+   if (answer < 0){
+      answer = 0;
+   }
+   for (ll i = 1; i < n; i++){
+      tmp = cht.query(s[i]) + si[i];
+      if (tmp < nums[i]){
+         tmp = nums[i];
+      }
+      if (answer < tmp){
+         answer = tmp;
+      }
+      dp[i] = tmp;
+      cht.add(-i, i * s[i - 1] - si[i - 1]);
+   }
+   cout << answer;
+
+   return 0;
+}
