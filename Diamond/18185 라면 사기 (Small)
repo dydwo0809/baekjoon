@@ -1,0 +1,30 @@
+import sys
+input = sys.stdin.readline
+
+n = int(input())
+nums = list(map(int, input().split()))
+
+answer = 0
+for i in range(n - 2):
+    a, b, c = nums[i], nums[i + 1], nums[i + 2]
+    if b > c:
+        m = min(a, b - c)
+        answer += m * 5
+        for j in range(2):
+            nums[i + j] -= m
+    a, b, c = nums[i], nums[i + 1], nums[i + 2]
+    m = min(a, b, c)
+    answer += m * 7
+    for j in range(3):
+        nums[i + j] -= m
+
+a, b = nums[n - 2], nums[n - 1]
+m = min(a, b)
+answer += m * 5
+for j in range(2):
+    nums[n - 2 + j] -= m
+
+for i in range(n):
+    answer += nums[i] * 3
+
+print(answer)
