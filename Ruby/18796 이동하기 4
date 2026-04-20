@@ -1,0 +1,88 @@
+import sys
+import math
+
+input = sys.stdin.readline
+
+
+def check(k1, h1, k2, h2, type):
+    if type == 0 and k1 * h2 >= k2 * h1:
+        return True
+    elif type == 1 and k1 * h2 <= k2 * h1:
+        return True
+    else:
+        return False
+
+
+def compress(side, type):
+    result = []
+    for i in range(len(side)):
+        k1, h1 = side[i], 1
+        while result:
+            k2, h2 = result.pop()
+            if check(k1, h1, k2, h2, type):
+                k1 += k2
+                h1 += h2
+            else:
+                result.append([k2, h2])
+                break
+        result.append([k1, h1])
+    return result
+
+
+def fountain(a, b):
+    g = math.gcd(a, b)
+    return [a // g, b // g]
+
+
+def fountainSum(f1, f2):
+    up = f1[0] * f2[1] + f1[1] * f2[0]
+    down = f1[1] * f2[1]
+    return fountain(up, down)
+
+
+n, m = map(int, input().split())
+A = list(map(int, input().split()))
+B = list(map(int, input().split()))
+
+std = n * B[0] + m * A[n]
+
+R = [0] * n
+C = [0] * m
+for i in range(n):
+    R[i] = A[i] - A[i + 1]
+
+for i in range(m):
+    C[i] = B[i + 1] - B[i]
+
+row = compress(R, 0)
+col = compress(C, 1)
+
+s = 0
+for r, h in row:
+    s += r
+
+R = []
+C = []
+for i in range(len(row)):
+    r, h = row[i]
+    for j in range(h):
+        R.append(fountain(r, h))
+
+for i in range(len(col)):
+    c, h = col[i]
+    for j in range(h):
+        C.append(fountain(c, h))
+
+s = [s, 1]
+answer = [std, 1]
+i = 0
+for j in range(len(C)):
+    while i < len(R) and fountainSum(R[i], C[j])[0] >= 0:
+        s = fountainSum(s, [-R[i][0], R[i][1]])
+        i += 1
+    if i == len(R):
+        break
+    temp = fountainSum(s, [(len(R) - i) * C[j][0], C[j][1]])
+    answer = fountainSum(answer, temp)
+
+print(answer[0])
