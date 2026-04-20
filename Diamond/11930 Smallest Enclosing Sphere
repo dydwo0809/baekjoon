@@ -1,0 +1,45 @@
+import sys
+input = sys.stdin.readline
+
+
+def dist2_3d(p1, p2):
+    return (p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2 + (p1[2] - p2[2]) ** 2
+
+
+n = int(input())
+points = []
+sumX = 0
+sumY = 0
+sumZ = 0
+for i in range(n):
+    x, y, z = map(float, input().split())
+    sumX += x
+    sumY += y
+    sumZ += z
+    points.append([x, y, z])
+
+x = sumX / n
+y = sumY / n
+z = sumZ / n
+
+lr = 1
+m = 0
+for epoch in range(50000):
+    d = 0
+    p1 = [x, y, z]
+    for i in range(n):
+        p2 = points[i]
+        temp = dist2_3d(p1, p2)
+        if temp > d:
+            d = temp
+            m = i
+    x += (points[m][0] - x) * lr
+    y += (points[m][1] - y) * lr
+    z += (points[m][2] - z) * lr
+
+    if epoch % 2000 == 0:
+        lr /= 10
+
+d = dist2_3d([x, y, z], points[m]) ** (1/2)
+d = "%.2f" % round(d, 2)
+print(d)
