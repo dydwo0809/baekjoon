@@ -1,0 +1,129 @@
+import sys
+input = sys.stdin.readline
+import math
+
+
+def dist2(p1, p2):
+    return (p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2
+
+
+def ccw(v1, v2):
+    return v1[0] * v2[1] - v1[1] * v2[0]
+
+
+def ccwP(p1, p2, p3):
+    v1 = [p2[0] - p1[0], p2[1] - p1[1]]
+    v2 = [p3[0] - p1[0], p3[1] - p1[1]]
+    return ccw(v1, v2)
+
+
+def convexHull(points):
+    points.sort(key=lambda x: (x[1], x[0]))
+    x0, y0 = points[0]
+    slope = []
+    for i in range(1, len(points)):
+        x, y = points[i]
+        if x == x0:
+            slope.append([i, 90])
+        else:
+            temp = math.degrees(math.atan((y - y0) / (x - x0)))
+            if temp < 0:
+                temp = 180 + temp
+            slope.append([i, temp])
+    slope.sort(key=lambda x: x[1])
+    slope.append([0, 0])
+    stack = []
+    stack.append([x0, y0])
+    stack.append(points[slope[0][0]])
+    for i, dummy in slope:
+        x, y = points[i]
+        p1 = stack[-2]
+        p2 = stack[-1]
+        v1 = p2[0] - p1[0], p2[1] - p1[1]
+        v2 = x - p1[0], y - p1[1]
+        c = ccw(v1, v2)
+        while c <= 0:
+            stack.pop()
+            if len(stack) == 1:
+                break
+            p1 = stack[-2]
+            p2 = stack[-1]
+            v1 = p2[0] - p1[0], p2[1] - p1[1]
+            v2 = x - p1[0], y - p1[1]
+            c = ccw(v1, v2)
+        stack.append([x, y])
+    stack.pop()
+    return stack
+
+
+def most_dist(info, t):
+    points = []
+    for i in range(n):
+        x = info[i][0] + t * info[i][2]
+        y = info[i][1] + t * info[i][3]
+        points.append([x, y])
+
+    ch = convexHull(points)
+
+    if len(ch) == 1:
+        ch.append(points[-1])
+
+    p1 = ch[0]
+    p2 = ch[1]
+    v1 = [p2[0] - p1[0], p2[1] - p1[1]]
+    index = 1
+    l = len(ch)
+    for i in range(1, l):
+        v2 = [ch[(i + 1) % l][0] - ch[i][0], ch[(i + 1) % l][1] - ch[i][1]]
+        if ccw(v1, v2) <= 0:
+            d = dist2(p1, ch[i])
+            index = i
+            break
+
+    answer = d
+    for i in range(1, l):
+        v1 = [ch[(i + 1) % l][0] - ch[i][0], ch[(i + 1) % l][1] - ch[i][1]]
+        while True:
+            v2 = [ch[(index + 1) % l][0] - ch[index][0], ch[(index + 1) % l][1] - ch[index][1]]
+            if ccw(v1, v2) <= 0:
+                temp = dist2(ch[i], ch[index])
+                d = temp
+                break
+            index = (index + 1) % l
+        if d > answer:
+            answer = d
+
+    return answer
+
+
+def sol(s, e):
+    if e - s <= 2:
+        d1 = most_dist(info, s)
+        d2 = most_dist(info, s + 1)
+        d3 = most_dist(info, e)
+
+        if d1 <= d2 and d1 <= d3:
+            return s, d1
+        if d2 <= d1 and d2 <= d3:
+            return s + 1, d2
+        if d3 <= d1 and d3 <= d2:
+            return e, d3
+
+    t1 = (2 * s + e) // 3
+    t2 = (s + 2 * e) // 3
+    d1 = most_dist(info, t1)
+    d2 = most_dist(info, t2)
+    if d1 > d2:
+        return sol(t1, e)
+    else:
+        return sol(s, t2)
+
+
+n, t = map(int, input().split())
+info = []
+for i in range(n):
+    info.append(list(map(int, input().split())))
+
+at, ad = sol(0, t)
+print(at)
+print(ad)
