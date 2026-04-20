@@ -1,0 +1,47 @@
+import sys
+from collections import deque
+input = sys.stdin.readline
+
+
+def cross(line1, line2):
+    a1, b1 = line1
+    a2, b2 = line2
+    return (b2 - b1) / (a1 - a2)
+
+
+def f(x):
+    global a, b, c
+    return a * x ** 2 + b * x + c
+
+
+n = int(input())
+a, b, c = map(int, input().split())
+nums = list(map(int, input().split()))
+s = [0]
+temp = 0
+for i in nums:
+    temp += i
+    s.append(temp)
+
+dp = [0] * (n + 1)
+cht = deque()
+line0 = [0, 0]
+cht.append([0, line0])
+for i in range(1, n + 1):
+    while len(cht) > 1 and s[i] >= cht[1][0]:
+        cht.popleft()
+    line = cht[0][1]
+    dp[i] = line[1] + line[0] * s[i] + f(s[i])
+
+    new_line = [-2 * a * s[i], dp[i] + a * s[i] ** 2 - b * s[i]]
+    while len(cht) > 0:
+        x = cross(new_line, cht[-1][1])
+        if x <= cht[-1][0]:
+            cht.pop()
+        else:
+            cht.append([x, new_line])
+            break
+    else:
+        cht.append([0, new_line])
+
+print(dp[-1])
