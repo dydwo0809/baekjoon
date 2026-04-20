@@ -1,0 +1,222 @@
+import sys
+input = sys.stdin.readline
+from decimal import Decimal
+
+
+# p1, p2를 지나는 직선과 점 p3 사이의 거리
+def dist(p1, p2, p3):
+    if p1[0] == p2[0]:
+        return abs(p3[0] - p1[0])
+    a = p2[1] - p1[1]
+    b = p2[0] - p1[0]
+    c = -a * p1[0] + b * p1[1]
+    return abs(a * p3[0] - b * p3[1] + c) / (a ** 2 + b ** 2) ** (1/2)
+
+
+# p1, p2를 지나는 직선 안쪽 법선벡터
+def orthogonal(p1, p2):
+    v = [p2[0] - p1[0], p2[1] - p1[1]]
+    n_v = [v[1], -v[0]]
+    if ccw(v, n_v) < 0:
+        n_v[0] *= -1
+        n_v[1] *= -1
+    d = dist2(p1, p2) ** (1/2)
+    n_v[0] /= d
+    n_v[1] /= d
+    return n_v
+
+
+def dist2(p1, p2):
+    return (p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2
+
+
+def incenter(points):
+    l = len(points)
+    if l != 3:
+        return False
+    p1 = points[0]
+    p2 = points[1]
+    p3 = points[2]
+    AB = dist2(p1, p2) ** (1/2)
+    BC = dist2(p2, p3) ** (1/2)
+    CA = dist2(p3, p1) ** (1/2)
+    x = 0
+    y = 0
+    x += AB * p3[0]
+    x += BC * p1[0]
+    x += CA * p2[0]
+    y += AB * p3[1]
+    y += BC * p1[1]
+    y += CA * p2[1]
+    x /= (AB + BC + CA)
+    y /= (AB + BC + CA)
+
+    return [x, y]
+
+
+def ccw(v1, v2):
+    return v1[0] * v2[1] - v1[1] * v2[0]
+
+
+def ccwP(p1, p2, p3):
+    v1 = [p2[0] - p1[0], p2[1] - p1[1]]
+    v2 = [p3[0] - p1[0], p3[1] - p1[1]]
+    return ccw(v1, v2)
+
+
+def normalization(v):
+    d = (v[0] ** 2 + v[1] ** 2) ** (1/2)
+    result = [v[0], v[1]]
+    result[0] /= d
+    result[1] /= d
+    return result
+
+
+def norm(v):
+    return (v[0] ** 2 + v[1] ** 2) ** (1 / 2)
+
+
+while True:
+    n = int(input())
+    if n == 0:
+        break
+    points = []
+    sumX = 0
+    sumY = 0
+    for i in range(n):
+        x, y = map(float, input().split())
+        sumX += x
+        sumY += y
+        points.append([x, y])
+
+    if n == 3:
+        x, y = incenter(points)
+        d = 2000000000
+        for i in range(n):
+            p1, p2 = points[i], points[(i + 1) % n]
+            temp = dist(p1, p2, [x, y])
+            if temp < d:
+                d = temp
+
+    else:
+        normals = []
+        for i in range(n):
+            p1, p2 = points[i], points[(i + 1) % n]
+            v = orthogonal(p1, p2)
+            normals.append(v)
+
+        x = sumX / n
+        y = sumY / n
+
+        d = 2000000000
+        p3 = [x, y]
+        for i in range(n):
+            p1, p2 = points[i], points[(i + 1) % n]
+            temp = dist(p1, p2, p3)
+            if temp < d:
+                d = temp
+
+        lr = min(1, d)
+        m = 0
+        start_x = x
+        start_y = y
+        for epoch in range(1000):
+            d = 2000000000
+            p3 = [x, y]
+            for i in range(n):
+                p1, p2 = points[i], points[(i + 1) % n]
+                temp = dist(p1, p2, p3)
+                if temp < d:
+                    d = temp
+                    m = i
+            v = normals[m]
+            x += v[0] * lr
+            y += v[1] * lr
+
+            lr *= 0.99
+
+        parallel = False
+        p1, p2 = points[m], points[(m + 1) % n]
+        v1 = [p2[0] - p1[0], p2[1] - p1[1]]
+        for i in range(n):
+            if i == m:
+                continue
+            p1, p2 = points[i], points[(i + 1) % n]
+            v2 = [p2[0] - p1[0], p2[1] - p1[1]]
+            if ccw(v1, v2) == 0:
+                parallel = True
+                break
+
+        v = [x - start_x, y - start_y]
+        if not parallel:
+            if abs(v[0]) < 0.0000001 and abs(v[1]) < 0.0000001:
+                a = m
+                b = m
+                p1, p2 = points[m], points[(m + 1) % n]
+                v1 = [p2[0] - p1[0], p2[1] - p1[1]]
+                for i in range(n):
+                    if i == a:
+                        continue
+                    p1, p2 = points[i], points[(i + 1) % n]
+                    v2 = [p2[0] - p1[0], p2[1] - p1[1]]
+                    if round(ccw(v1, v2) / (norm(v1) * norm(v2)), 7) == 0:
+                        b = i
+                        break
+                n1 = normals[a]
+                n2 = normals[b]
+                v = [n1[0] + n2[0], n1[1] + n2[1]]
+                v = normalization(v)
+
+                for i in range(30000):
+                    d = 2000000000
+                    next_m = 0
+                    p3 = [x, y]
+                    for i in range(n):
+                        p1, p2 = points[i], points[(i + 1) % n]
+                        temp = dist(p1, p2, p3)
+                        if temp < d:
+                            d = temp
+                            next_m = i
+                    x += v[0] * 0.1
+                    y += v[1] * 0.1
+                    if next_m != a and next_m != b:
+                        m = next_m
+                        break
+
+            else:
+                v = normalization(v)
+                lr = min(1, d)
+                while True:
+                    d = 2000000000
+                    next_m = 0
+                    p3 = [x, y]
+                    for i in range(n):
+                        p1, p2 = points[i], points[(i + 1) % n]
+                        temp = dist(p1, p2, p3)
+                        if temp < d:
+                            d = temp
+                            next_m = i
+                    x += v[0] * lr
+                    y += v[1] * lr
+                    if m != next_m:
+                        m = next_m
+                        break
+
+        lr = dist(points[m], points[(m + 1) % n], [x, y])
+        for epoch in range(100000):
+            d = 2000000000
+            p3 = [x, y]
+            for i in range(n):
+                p1, p2 = points[i], points[(i + 1) % n]
+                temp = dist(p1, p2, p3)
+                if temp < d:
+                    d = temp
+                    m = i
+            v = normals[m]
+            x += v[0] * lr
+            y += v[1] * lr
+
+            lr *= 0.99
+
+        d = dist(points[m], points[(m + 1) % n], [x, y])
+    print(d)
