@@ -1,0 +1,135 @@
+import sys
+input = sys.stdin.readline
+
+memo = {}
+
+mod = 600921647
+
+
+def I(n):
+    result = []
+    for i in range(n):
+        temp = [0] * n
+        temp[i] = 1
+        result.append(temp)
+    return result
+
+
+def mat_sum(mat1, mat2):
+    a = len(mat1)
+    b = len(mat1[0])
+    result = [[0] * b for i in range(a)]
+    for i in range(a):
+        for j in range(b):
+            result[i][j] = (mat1[i][j] + mat2[i][j]) % mod
+    return result
+
+
+def mat_multiply(mat1, mat2):
+    a = len(mat1)
+    b = len(mat2)
+    answer = []
+    for i in range(a):
+        temp_list = []
+        for j in range(a):
+            temp = 0
+            for k in range(b):
+                temp += mat1[i][k] * mat2[k][j] % mod
+            temp_list.append(temp % mod)
+        answer.append(temp_list)
+    return answer
+
+
+def mat_pow(mat, n):
+    if n in memo:
+        return memo[n]
+    if n == 1:
+        memo[1] = mat
+        return mat
+    elif n % 2 == 0:
+        memo[n] = mat_multiply(mat_pow(mat, n // 2), mat_pow(mat, n // 2))
+        return mat_multiply(mat_pow(mat, n // 2), mat_pow(mat, n // 2))
+    else:
+        temp = mat_multiply(mat_pow(mat, (n - 1) // 2), mat_pow(mat, (n - 1) // 2))
+        memo[n] = mat_multiply(temp, mat)
+        return mat_multiply(temp, mat)
+
+
+def sum_mat_sq(mat, b):
+    if b == 1:
+        return mat
+    if b % 2 == 0:
+        return mat_multiply(sum_mat_sq(mat, b // 2), mat_sum(I(len(mat)), mat_pow(mat, b // 2)))
+    else:
+        return mat_sum(sum_mat_sq(mat, b - 1), mat_pow(mat, b))
+
+
+n = int(input())
+music = []
+L = 0
+for i in range(n):
+    temp = list(map(int, input().split()))
+    if temp[1] > L:
+        L = temp[1]
+    music.append(temp)
+
+m = int(input())
+genre = []
+for i in range(m):
+    genre.append(input().strip())
+
+graph = [[0] * m * L for i in range(m * L)]
+for i in range(m):
+    s, e = L * i, L * i + 1
+    for k in range(L - 1):
+        graph[s + k][e + k] = 1
+
+for i, l in music:
+    s = L * i + l - 1
+    for j in range(m):
+        if genre[i][j] == "Y":
+            graph[s][L * j] += 1
+
+endPoints = []
+for i in range(m * L):
+    j = i // L
+    if graph[i][j * L] > 0:
+        endPoints.append([i, graph[i][j * L]])
+
+count_len1 = [0] * m
+for i, l in music:
+    if l == 1:
+        count_len1[i] += 1
+
+
+def clac(a):
+    if a == 0:
+        return 0
+    if a == 1:
+        return sum(count_len1)
+
+    mat_a = sum_mat_sq(graph, a - 1)
+
+    s = sum(count_len1)
+    for i in range(m):
+        for j, w in endPoints:
+            if j % L == 0:
+                continue
+            s += mat_a[i * L][j] * w
+            s %= mod
+
+    count_V = [0] * m
+    for j in range(m):
+        for i in range(m):
+            count_V[j] += mat_a[i * L][j * L]
+
+    for i in range(m):
+        s += count_len1[i] * count_V[i]
+        s %= mod
+
+    return s
+
+
+a, b = map(int, input().split())
+answer = clac(b) - clac(a - 1)
+print(answer % mod)
