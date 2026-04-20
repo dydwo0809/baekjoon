@@ -1,0 +1,38 @@
+import sys
+input = sys.stdin.readline
+
+n, b, c = map(int, input().split())
+nums = list(map(int, input().split()))
+
+if c < b:
+    answer = 0
+    for i in range(n - 2):
+        x, y, z = nums[i], nums[i + 1], nums[i + 2]
+        if y > z:
+            m = min(x, y - z)
+            answer += m * (b + c)
+            for j in range(2):
+                nums[i + j] -= m
+        x, y, z = nums[i], nums[i + 1], nums[i + 2]
+        m = min(x, y, z)
+        answer += m * (b + 2 * c)
+        for j in range(3):
+            nums[i + j] -= m
+
+    x, y = nums[n - 2], nums[n - 1]
+    m = min(x, y)
+    answer += m * (b + c)
+    for j in range(2):
+        nums[n - 2 + j] -= m
+
+    for i in range(n):
+        answer += nums[i] * b
+
+    print(answer)
+
+else:
+    answer = 0
+    for i in range(n):
+        answer += nums[i] * b
+
+    print(answer)
