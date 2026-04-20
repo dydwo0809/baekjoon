@@ -1,0 +1,72 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+typedef long long ll;
+
+
+struct line {  
+   mutable ll m, k, p;  
+   bool operator<(const line &o) const { return m < o.m; }  
+   bool operator<(ll x) const { return p < x; }  
+};
+
+struct LineContainer : multiset<line, less<>> {  
+   //(for doubles, use inf = 1/.0, div(a,b) = a/b)  
+   const static ll inf = LLONG_MAX;  
+
+   ll div(ll a, ll b) { 
+      return a / b - ((a ^ b) < 0 && a % b); 
+   } 
+
+   bool isect(iterator x, iterator y) {  
+      if (y == end()) return x->p = inf, 0;  
+      if (x->m == y->m) x->p = x->k > y->k ? inf : -inf;  
+      else x->p = div(y->k - x->k, x->m - y->m);  
+      return x->p >= y->p;  
+   }  
+
+   void add(ll m, ll k) { //add y = mx + k  
+      auto z = insert({m, k}), y = z++, x = y;  
+      while (isect(y, z)) z = erase(z);  
+      if (x != begin() && isect(--x, y)) isect(x, y = erase(y));  
+      while ((y = x) != begin() && (--x)->p >= y->p) isect(x, erase(y));  
+   }  
+
+   ll query(ll x) {  
+      auto l = *lower_bound(x);  
+      return l.m * x + l.k;  
+   }  
+} cht;
+
+int main() {
+   ios_base::sync_with_stdio(false);
+   cin.tie(0);
+   cout.tie(0);
+
+   int n;
+   cin >> n;
+   vector<ll> h(n);
+   for(int i = 0; i < n; i++){
+      cin >> h[i];
+   }
+   vector<ll> w(n);
+   for(int i = 0; i < n; i++){
+      cin >> w[i];
+   }
+   ll temp = 0;
+   vector<ll> s(n);
+   for (int i = 0; i < n; i++){
+      temp += w[i];
+      s[i] = temp;
+   }
+
+   vector<ll> dp(n);
+   cht.add(2 * h[0], -dp[0] - h[0] * h[0] + s[0]);
+   for (int i = 1; i < n; i++){
+      dp[i] = -cht.query(h[i]) + h[i] * h[i] + s[i - 1];
+      cht.add(2 * h[i], -dp[i] - h[i] * h[i] + s[i]);
+   }
+   cout << dp[n - 1];
+
+   return 0;
+}
