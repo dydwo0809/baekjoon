@@ -1,0 +1,71 @@
+import sys
+input = sys.stdin.readline
+
+
+n = int(input())
+nums = list(map(int, input().split()))
+m = int(input())
+query = []
+block = int(n ** 0.5)
+for i in range(m):
+    a, b = map(int, input().split())
+    a, b = a - 1, b - 1
+    query.append([a, b, i, a // block])
+
+query.sort(key=lambda x: (x[3], x[1]))
+
+answer = [0] * m
+l, r = 0, -1
+cnt = [0] * 1000001
+cnt2 = [0] * (n + 1)
+M = 0
+s = 0
+for a, b, idx, dummy in query:
+    while a < l:
+        l -= 1
+        if cnt[nums[l]] == 0:
+            s += 1
+        cnt2[cnt[nums[l]]] -= 1
+        cnt[nums[l]] += 1
+        cnt2[cnt[nums[l]]] += 1
+
+        if cnt[nums[l]] > M:
+            M = cnt[nums[l]]
+
+    while a > l:
+        cnt2[cnt[nums[l]]] -= 1
+        if cnt2[M] == 0:
+            M -= 1
+        cnt[nums[l]] -= 1
+        cnt2[cnt[nums[l]]] += 1
+
+        if cnt[nums[l]] == 0:
+            s -= 1
+        l += 1
+
+    while b < r:
+        cnt2[cnt[nums[r]]] -= 1
+        if cnt2[M] == 0:
+            M -= 1
+        cnt[nums[r]] -= 1
+        cnt2[cnt[nums[r]]] += 1
+
+        if cnt[nums[r]] == 0:
+            s -= 1
+        r -= 1
+
+    while b > r:
+        r += 1
+        if cnt[nums[r]] == 0:
+            s += 1
+        cnt2[cnt[nums[r]]] -= 1
+        cnt[nums[r]] += 1
+        cnt2[cnt[nums[r]]] += 1
+
+        if cnt[nums[r]] > M:
+            M = cnt[nums[r]]
+
+    answer[idx] = M
+
+for ans in answer:
+    print(ans)
