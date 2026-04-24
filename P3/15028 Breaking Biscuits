@@ -1,0 +1,84 @@
+import sys
+input = sys.stdin.readline
+import math
+
+
+# p1, p2를 지나는 직선과 점 p3 사이의 거리
+def dist(p1, p2, p3):
+    if p1[0] == p2[0]:
+        return abs(p3[0] - p1[0])
+    a = p2[1] - p1[1]
+    b = p2[0] - p1[0]
+    c = -a * p1[0] + b * p1[1]
+    return abs(a * p3[0] - b * p3[1] + c) / (a ** 2 + b ** 2) ** (1/2)
+
+
+def ccw(v1, v2):
+    return v1[0] * v2[1] - v1[1] * v2[0]
+
+
+def convexHull(points):
+    points.sort(key=lambda x: (x[1], x[0]))
+    x0, y0 = points[0]
+    slope = []
+    for i in range(1, len(points)):
+        x, y = points[i]
+        if x == x0:
+            slope.append([i, 90])
+        else:
+            temp = math.degrees(math.atan((y - y0) / (x - x0)))
+            if temp < 0:
+                temp = 180 + temp
+            slope.append([i, temp])
+    slope.sort(key=lambda x: x[1])
+    slope.append([0, 0])
+    stack = []
+    stack.append([x0, y0])
+    stack.append(points[slope[0][0]])
+    for i, dummy in slope:
+        x, y = points[i]
+        p1 = stack[-2]
+        p2 = stack[-1]
+        v1 = p2[0] - p1[0], p2[1] - p1[1]
+        v2 = x - p1[0], y - p1[1]
+        c = ccw(v1, v2)
+        while c <= 0:
+            stack.pop()
+            if len(stack) == 1:
+                break
+            p1 = stack[-2]
+            p2 = stack[-1]
+            v1 = p2[0] - p1[0], p2[1] - p1[1]
+            v2 = x - p1[0], y - p1[1]
+            c = ccw(v1, v2)
+        stack.append([x, y])
+    stack.pop()
+    return stack
+
+
+n = int(input())
+points = []
+for i in range(n):
+    points.append(list(map(int, input().split())))
+
+ch = convexHull(points)
+
+l = len(ch)
+
+maxs = [-1] * len(ch)
+index = 2
+for i in range(l):
+    p1 = ch[i]
+    p2 = ch[(i + 1) % l]
+    while True:
+        index %= l
+        p = ch[index]
+        d = dist(p1, p2, p)
+        if maxs[i] < d:
+            maxs[i] = d
+            index += 1
+        else:
+            index -= 1
+            break
+answer = min(maxs)
+print(answer)
