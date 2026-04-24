@@ -1,0 +1,13 @@
+n = int(input())
+
+fibo = [1, 2]
+temp = 3
+while temp <= n:
+    fibo.append(temp)
+    temp += fibo[-2]
+
+while n not in fibo:
+    while n < fibo[-1]:
+        fibo.pop()
+    n -= fibo[-1]
+print(n)
