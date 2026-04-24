@@ -1,0 +1,28 @@
+import sys
+input = sys.stdin.readline
+import heapq
+
+n, m = map(int, input().split())
+LP = []
+for i in range(n):
+    LP.append(list(map(int, input().split())))
+
+LP.sort(key=lambda x: (-x[0], -x[1]))
+
+teams = list(map(int, input().split()))
+teams.sort(reverse=True)
+
+heap = []
+answer = LP[0][1]
+s = 1
+e = 1
+for i in range(len(teams) - 1):
+    t = teams[i]
+    e += t
+    e = min(e, n)
+    for j in range(s, e):
+        l, p = LP[j]
+        heapq.heappush(heap, [-p, l])
+    answer += -heapq.heappop(heap)[0]
+    s = e
+print(answer)
