@@ -1,0 +1,44 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    string s;
+    cin >> s;
+
+    stack<char> st;
+    vector<pair<int, int>> answer;
+
+    char standard = s[0];
+
+    int i = 0;
+    int l = s.length();
+
+    while (i < l) {
+        if (i == 0 or (s[i] != standard or st.top() == standard)) {
+            st.push(s[i]);
+            i++;
+            continue;
+        }
+
+        int temp = 0;
+        while (i < l and st.top() != standard and s[i] == standard) {
+            temp++;
+            st.pop();
+            i++;
+        }
+        answer.push_back({st.size() + 1, st.size() + 2 * temp});
+    }
+
+    if (st.size() > 0) answer.push_back({1, st.size()});
+
+    cout << answer.size() << "\n";
+
+    for (int i = 0; i < answer.size(); i++) {
+        cout << answer[i].first << " " << answer[i].second << "\n";
+    }
+}
