@@ -1,0 +1,32 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+typedef vector<vector<int>> matrix;
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int n;
+    cin >> n;
+    vector<int> nums(n);
+    for (auto &i : nums) cin >> i;
+
+    int s = accumulate(nums.begin(), nums.end(), 0);
+    matrix dp(n, vector<int>(s + 1, -1));
+
+    dp[0][nums[0]] = nums[0];
+    for (int i = 0; i < n - 1; i++) {
+        int next_block = nums[i + 1];
+        dp[i + 1][next_block] = max(dp[i + 1][next_block], next_block);
+        for (int j = 0; j < s + 1; j++) {
+            if (dp[i][j] == -1) continue;
+            dp[i + 1][j] = max(dp[i + 1][j], dp[i][j]);
+            dp[i + 1][j + next_block] = max(dp[i + 1][j + next_block], dp[i][j] + next_block);
+            if (j > next_block) dp[i + 1][j - next_block] = max(dp[i + 1][j - next_block], dp[i][j]);
+            else dp[i + 1][next_block - j] = max(dp[i + 1][next_block - j], dp[i][j] + (next_block - j));
+        }
+    }
+    cout << dp[n - 1][0] << "\n";
+}
