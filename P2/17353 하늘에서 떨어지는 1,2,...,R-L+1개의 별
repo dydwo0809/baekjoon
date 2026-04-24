@@ -1,0 +1,81 @@
+import sys
+
+input = sys.stdin.readline
+
+
+def init(a, tree, node, start, end):
+    if start == end:
+        tree[node] = a[start]
+    else:
+        init(a, tree, node * 2, start, (start + end) // 2)
+        init(a, tree, node * 2 + 1, (start + end) // 2 + 1, end)
+        tree[node] = tree[node * 2] + tree[node * 2 + 1]
+
+
+def update_lazy(tree, lazy, node, start, end):
+    if lazy[node][0] != 0:
+        s = lazy[node][0]
+        e = s + lazy[node][1] * (end - start)
+        tree[node] += (s + e) * (end - start + 1) // 2
+        if start != end:
+            lazy[node * 2][0] += s
+            lazy[node * 2][1] += lazy[node][1]
+            lazy[node * 2 + 1][0] += s + lazy[node][1] * ((end - start) // 2 + 1)
+            lazy[node * 2 + 1][1] += lazy[node][1]
+        lazy[node] = [0, 0]
+
+
+def update(tree, lazy, node, start, end, left, right):
+    update_lazy(tree, lazy, node, start, end)
+
+    if right < start or left > end:
+        return
+
+    if left <= start and end <= right:
+        s = 1 + start - left
+        e = s + end - start
+        tree[node] += (s + e) * (end - start + 1) // 2
+        if start != end:
+            lazy[node * 2][0] += s
+            lazy[node * 2][1] += 1
+            lazy[node * 2 + 1][0] += (s + e) // 2 + 1
+            lazy[node * 2 + 1][1] += 1
+        return
+
+    update(tree, lazy, node * 2, start, (start+end) // 2, left, right)
+    update(tree, lazy, node * 2 + 1, (start+end) // 2 + 1, end, left, right)
+
+    tree[node] = tree[node * 2] + tree[node * 2 + 1]
+
+
+def query(tree, lazy, node, start, end, left, right):
+    update_lazy(tree, lazy, node, start, end)
+
+    if left > end or right < start:
+        return 0
+
+    if left <= start and end <= right:
+        return tree[node]
+
+    l = query(tree, lazy, node * 2, start, (start + end) // 2, left, right)
+    r = query(tree, lazy, node * 2 + 1, (start + end) // 2 + 1, end, left, right)
+    return l + r
+
+
+n = int(input())
+a = list(map(int, input().split()))
+m = int(input())
+tree_size = n * 4
+tree = [0] * tree_size
+lazy = [[0, 0] for i in range(tree_size)]
+
+init(a, tree, 1, 0, n - 1)
+
+for _ in range(m):
+    w = list(map(int, input().split()))
+    if w[0] == 1:
+        l, r = w[1], w[2]
+        update(tree, lazy, 1, 0, n - 1, l - 1, r - 1)
+    else:
+        x = w[1]
+        print(query(tree, lazy, 1, 0, n - 1, x - 1, x - 1))
