@@ -1,0 +1,46 @@
+import sys
+input = sys.stdin.readline
+
+
+M = 400000001
+
+
+def dist2(p1, p2):
+    return (p2[0] - p1[0]) ** 2 + (p2[1] - p1[1]) ** 2
+
+
+def closest(l, r):
+    if l >= r:
+        return M
+    if r - l == 1:
+        return dist2(points[l], points[r])
+
+    mid = (l + r) // 2
+    min_left = closest(l, mid - 1)
+    min_right = closest(mid + 1, r)
+
+    m = min(min_left, min_right)
+
+    candy = []
+    line = points[mid][0]
+    for i in range(l, r + 1):
+        if (line - points[i][0]) ** 2 < m:
+            candy.append(points[i])
+
+    candy.sort(key=lambda x: x[1])
+
+    for i in range(len(candy) - 1):
+        for j in range(i + 1, len(candy)):
+            p1, p2 = candy[i], candy[j]
+            if (p2[1] - p1[1]) ** 2 < m:
+                m = min(m, dist2(p1, p2))
+            else:
+                break
+
+    return m
+
+
+n = int(input())
+points = [list(map(int, input().split())) for i in range(n)]
+points.sort()
+print(closest(0, n - 1))
