@@ -1,0 +1,166 @@
+import sys
+input = sys.stdin.readline
+
+
+def gcd(a, b):
+    while b:
+        a, b = b, a % b
+    return a
+
+
+# 한쪽 변에 x, y, 상수항이 여러개 있으면 하나로 정리하는 코드
+# result = [x의 계수, y의 계수, 상수항]
+def organize(side):
+    result = [0, 0, 0]
+    polynomial = side.strip().split()
+    for i in range(len(polynomial)):
+        term = polynomial[i]
+        if term == "+":
+            continue
+
+        if term == "-":
+            next = polynomial[i + 1]
+            if next[0] == "-":
+                next = next[1:]
+                polynomial[i + 1] = next
+            else:
+                polynomial[i + 1] = "-" + next
+            continue
+
+        if term.endswith("x"):
+            if term == "x":
+                temp = 1
+            elif term == "-x":
+                temp = -1
+            else:
+                temp = int(term[:-1])
+            result[0] += temp
+
+        elif term.endswith("y"):
+            if term == "y":
+                temp = 1
+            elif term == "-y":
+                temp = -1
+            else:
+                temp = int(term[:-1])
+            result[1] += temp
+
+        else:
+            result[2] += int(term)
+
+    return result
+
+
+# bx = a 이런 꼴일 때
+# a / b 를 기약분수 꼴로 리턴하는 함수
+def makeFraction(a, b):
+    g = gcd(a, b)
+    a //= g
+    b //= g
+    if b < 0:
+        a = -a
+        b = -b
+    if b == 1:
+        return str(a)
+    else:
+        return str(a) + "/" + str(b)
+
+
+# x, y는 좌변으로, 상수는 우변으로 정리하는 함수
+# ax + by = c이면
+# result = [a, b, c]
+def transpose(org1, org2):
+    result = [0, 0, 0]
+    result[0] = org1[0] - org2[0]
+    result[1] = org1[1] - org2[1]
+    result[2] = org2[2] - org1[2]  # 상수항은 우항
+    return result
+
+
+# transpose 함수로 정리해놓은 일차 방정식 2개 받아서 연립 방정식 계산하는 코드
+def calculate(trans1, trans2):
+    x1, y1, r1 = trans1
+    x2, y2, r2 = trans2
+
+    if x1 == x2 and y1 == y2 and r1 == r2:
+        if x1 == 0 and y1 == 0:
+            return ["don't know", "don't know"]
+        if x1 == 0:
+            return ["don't know", makeFraction(r1, y1)]
+        if y1 == 0:
+            return [makeFraction(r1, x1), "don't know"]
+        return ["don't know", "don't know"]
+
+    if (x1 == 0 and y1 == 0 and r1 != 0) or (x2 == 0 and y2 == 0 and r2 != 0):
+        return ["don't know", "don't know"]
+
+    if x1 == 0 and y1 == 0 and r1 == 0:
+        if x2 == 0 and y2 != 0:
+            return ["don't know", makeFraction(r2, y2)]
+        elif x2 != 0 and y2 == 0:
+            return [makeFraction(r2, x2), "don't know"]
+        else:
+            return ["don't know", "don't know"]
+
+    if x2 == 0 and y2 == 0 and r2 == 0:
+        if x1 == 0 and y1 != 0:
+            return ["don't know", makeFraction(r1, y1)]
+        elif x1 != 0 and y1 == 0:
+            return [makeFraction(r1, x1), "don't know"]
+        else:
+            return ["don't know", "don't know"]
+
+    if y1 == 0 and x2 == 0:
+        return [makeFraction(r1, x1), makeFraction(r2, y2)]
+
+    if x1 == 0 and y2 == 0:
+        return [makeFraction(r2, x2), makeFraction(r1, y1)]
+
+    if x1 * y2 == x2 * y1:
+        return ["don't know", "don't know"]
+
+    temp1 = trans1[:]
+    temp2 = trans2[:]
+    t1 = temp1[0]
+    t2 = temp2[0]
+    for i in range(3):
+        temp1[i] *= t2
+        temp2[i] *= t1
+        temp2[i] -= temp1[i]
+
+    y = makeFraction(temp2[2], temp2[1])
+
+    temp1 = trans1[:]
+    temp2 = trans2[:]
+    t1 = temp1[1]
+    t2 = temp2[1]
+    for i in range(3):
+        temp1[i] *= t2
+        temp2[i] *= t1
+        temp2[i] -= temp1[i]
+
+    x = makeFraction(temp2[2], temp2[0])
+
+    return [x, y]
+
+
+n = int(input())
+for i in range(n):
+    if i != 0:
+        trash = input()
+        print()
+    left1, right1 = map(str, input().strip().split("="))
+    left2, right2 = map(str, input().strip().split("="))
+
+    left1 = organize(left1.strip())
+    left2 = organize(left2.strip())
+    right1 = organize(right1.strip())
+    right2 = organize(right2.strip())
+
+    trans1 = transpose(left1, right1)
+    trans2 = transpose(left2, right2)
+
+    answer = calculate(trans1, trans2)
+
+    print(answer[0])
+    print(answer[1])
