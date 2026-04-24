@@ -1,0 +1,63 @@
+import sys
+input = sys.stdin.readline
+
+
+def vector(p1, p2):
+    x1, y1 = p1[:2]
+    x2, y2 = p2[:2]
+    return [x2 - x1, y2 - y1]
+
+
+def ccw(v1, v2):
+    return v1[0] * v2[1] - v1[1] * v2[0]
+
+
+def halfConvexHull(points):
+    stack = []
+    stack.append(points[0])
+    stack.append(points[1])
+    for i in range(2, len(points)):
+        x, y, idx = points[i]
+        p1 = stack[-2]
+        p2 = stack[-1]
+        v1 = vector(p1, p2)
+        v2 = vector(p1, points[i])
+        c = ccw(v1, v2)
+        while c < 0:
+            stack.pop()
+            if len(stack) == 1:
+                break
+            p1 = stack[-2]
+            p2 = stack[-1]
+            v1 = vector(p1, p2)
+            v2 = vector(p1, points[i])
+            c = ccw(v1, v2)
+        stack.append([x, y, idx])
+    return stack
+
+
+n = int(input())
+if n == 1:
+    exit(1)
+
+points = []
+for i in range(n):
+    x, y = map(int, input().split())
+    points.append([1 / x, 1 / y, i + 1])
+
+points.sort(key=lambda p: (p[0], p[1]))
+u = [points[0]]
+for i in range(1, n):
+    x1, y1, i1 = u[-1]
+    x2, y2, i2 = points[i]
+    if (x2 == x1 and y2 == y1) or y2 < y1:
+        u.append(points[i])
+
+ch = halfConvexHull(u)
+answer = []
+for i in ch:
+    answer.append(i[2])
+
+answer.sort()
+
+print(*answer)
