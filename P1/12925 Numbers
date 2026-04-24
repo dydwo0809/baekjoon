@@ -1,0 +1,60 @@
+import sys
+input = sys.stdin.readline
+
+mod = 1000
+memo = {}
+
+
+def mat_multiply(mat1, mat2):
+    a = len(mat1)
+    b = len(mat2)
+    answer = []
+    for i in range(a):
+        temp_list = []
+        for j in range(a):
+            temp = 0
+            for k in range(b):
+                temp += mat1[i][k] * mat2[k][j] % mod
+            temp_list.append(temp % mod)
+        answer.append(temp_list)
+    return answer
+
+
+def mat_pow(mat, n):
+    if n in memo:
+        return memo[n]
+    if n == 0:
+        memo[0] = [
+            [1, 0],
+            [0, 1]
+        ]
+        return memo[0]
+    if n == 1:
+        memo[1] = mat
+        return mat
+    elif n % 2 == 0:
+        memo[n] = mat_multiply(mat_pow(mat, n // 2), mat_pow(mat, n // 2))
+        return mat_multiply(mat_pow(mat, n // 2), mat_pow(mat, n // 2))
+    else:
+        temp = mat_multiply(mat_pow(mat, (n - 1) // 2), mat_pow(mat, (n - 1) // 2))
+        memo[n] = mat_multiply(temp, mat)
+        return mat_multiply(temp, mat)
+
+
+mat = [
+    [6, 1],
+    [-4, 0]
+    ]
+
+start = [
+    [28, 6],
+    [6, 2]
+    ]
+
+t = int(input())
+for case in range(1, t + 1):
+    n = int(input())
+    answer = mat_multiply(start, mat_pow(mat, n - 2))
+    answer = str(answer[0][0] - 1)
+    answer = "0" * (3 - len(answer)) + answer
+    print("Case #{}: {}".format(case, answer))
