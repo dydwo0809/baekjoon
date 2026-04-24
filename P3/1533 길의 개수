@@ -1,0 +1,61 @@
+import sys
+input = sys.stdin.readline
+
+
+def mat_multiply(mat1, mat2):
+    a = len(mat1)
+    b = len(mat2)
+    answer = []
+    for i in range(a):
+        temp_list = []
+        for j in range(a):
+            temp = 0
+            for k in range(b):
+                temp += mat1[i][k] * mat2[k][j] % 1000003
+            temp_list.append(temp % 1000003)
+        answer.append(temp_list)
+    return answer
+
+
+def mat_pow(mat, n):
+    l = len(mat)
+    mat_temp = []
+    for i in mat:
+        mat_temp.append(i[:])
+
+    answer = []
+    for i in range(l):
+        temp = []
+        for j in range(l):
+            if i == j:
+                temp.append(1)
+            else:
+                temp.append(0)
+        answer.append(temp)
+
+    while n:
+        if n % 2 == 1:
+            answer = mat_multiply(answer, mat_temp)
+        n //= 2
+        mat_temp = mat_multiply(mat_temp, mat_temp)
+
+    return answer
+
+
+n, s, e, t = map(int, input().split())
+
+g = [[0] * 5 * n for i in range(5 * n)]
+
+for i in range(n):
+    line = input().strip()
+    for j in range(n):
+        w = int(line[j])
+        p1 = 5 * i + 4
+        p2 = 5 * (j + 1) - w
+        for k in range(w):
+            g[p1][p2] = 1
+            p1, p2 = p2, p2 + 1
+
+G = mat_pow(g, t)
+
+print(G[5 * s - 1][5 * e - 1])
