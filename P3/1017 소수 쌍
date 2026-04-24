@@ -1,0 +1,72 @@
+import sys
+
+sys.setrecursionlimit(10001)
+input = sys.stdin.readline
+
+
+def dfs(v):
+    for i in range(m):
+        if visit[i] == 1 or not prime(a[v] + b[i]):
+            continue
+        visit[i] = 1
+        if match[i] == -1 or dfs(match[i]):
+            match[i] = v
+            return True
+
+    return False
+
+
+eratos = [1] * 2000
+for i in range(2, 2000):
+    if eratos[i] == 1:
+        for j in range(2 * i, 2000, i):
+            eratos[j] = 0
+
+
+def prime(n):
+    if eratos[n] == 1:
+        return True
+    else:
+        return False
+
+
+n = int(input())
+nums = list(map(int, input().split()))
+
+a = []
+b = []
+std = nums[0] % 2
+for num in nums:
+    if num % 2 == std:
+        a.append(num)
+    else:
+        b.append(num)
+
+n = len(a)
+m = len(b)
+
+if n != m:
+    print(-1)
+    exit(0)
+    
+answer = []
+for i in range(m):
+    if not prime(a[0] + b[i]):
+        continue
+    match = [-1] * (m + 1)
+    match[i] = 0
+    cnt = 1
+    for j in range(1, n):
+        visit = [0] * (m + 1)
+        visit[i] = 1
+        if dfs(j):
+            cnt += 1
+
+    if cnt == n:
+        answer.append(b[i])
+
+answer.sort()
+if answer:
+    print(*answer)
+else:
+    print(-1)
