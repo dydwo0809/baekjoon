@@ -1,0 +1,73 @@
+import sys
+input = sys.stdin.readline
+
+
+def ccw(v1, v2):
+    return v1[0] * v2[1] - v1[1] * v2[0]
+
+
+def ccwP(p1, p2, p3):
+    v1 = [p2[0] - p1[0], p2[1] - p1[1]]
+    v2 = [p3[0] - p1[0], p3[1] - p1[1]]
+    return ccw(v1, v2)
+
+
+def halfConvexHull(points):
+    stack = []
+    stack.append(points[0])
+    stack.append(points[1])
+    for i in range(2, len(points)):
+        x, y = points[i]
+        p1 = stack[-2]
+        p2 = stack[-1]
+        v1 = p2[0] - p1[0], p2[1] - p1[1]
+        v2 = x - p1[0], y - p1[1]
+        c = ccw(v1, v2)
+        while c <= 0:
+            stack.pop()
+            if len(stack) == 1:
+                break
+            p1 = stack[-2]
+            p2 = stack[-1]
+            v1 = p2[0] - p1[0], p2[1] - p1[1]
+            v2 = x - p1[0], y - p1[1]
+            c = ccw(v1, v2)
+        stack.append([x, y])
+    return stack
+
+
+def chk(p1, p2, p):
+    p3 = [p[0], p[1] + 1]
+    if ccwP(p1, p2, p3) > 0 and ccwP(p1, p2, p) <= 0:
+        return True
+    return False
+
+
+def check(points, down):
+    for l in range(len(down) - 1):
+        p1 = down[l]
+        p2 = down[l + 1]
+        i, j = p1[0], p2[0]
+        for k in range(i + 1, j):
+            p = points[k]
+            if not chk(p1, p2, p):
+                return False
+    return True
+
+
+n = int(input())
+nums = list(map(int, input().split()))
+down = []
+a = 0
+down.append([0, a])
+for i in range(n):
+    a += nums[i]
+    down.append([i + 1, a])
+
+points = down[:]
+down = halfConvexHull(down[::-1])[::-1]
+
+if check(points, down):
+    print("Not Provable")
+else:
+    print("Provable")
