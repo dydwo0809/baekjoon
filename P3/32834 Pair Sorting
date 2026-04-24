@@ -1,0 +1,24 @@
+n = int(input())
+
+nums = [[0, 0]]
+for i in range(n):
+    nums.append([n - i, n - i])
+
+answer = []
+for target in range(n, 0, -1):
+    for _ in range(2):
+        s = 0
+        for i in range(1, n + 1):
+            if nums[i][1] == target:
+                s = i
+                break
+        while s != target:
+            answer.append([s, nums[s][1], nums[s + 1][0]])
+            nums[s][1], nums[s + 1][0] = nums[s + 1][0], nums[s][1]
+            nums[s].sort()
+            nums[s + 1].sort()
+            s += 1
+
+print(len(answer))
+for i in answer:
+    print(*i)
