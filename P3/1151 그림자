@@ -1,0 +1,110 @@
+import sys
+input = sys.stdin.readline
+import math
+
+
+def ccw(v1, v2):
+    return v1[0] * v2[1] - v1[1] * v2[0]
+
+
+def convexHull(points):
+    points.sort(key=lambda x: (x[1], x[0]))
+    x0, y0 = points[0]
+    slope = []
+    for i in range(1, len(points)):
+        x, y = points[i]
+        if x == x0:
+            slope.append([i, 90])
+        else:
+            temp = math.degrees(math.atan((y - y0) / (x - x0)))
+            if temp < 0:
+                temp = 180 + temp
+            slope.append([i, temp])
+    slope.sort(key=lambda x: x[1])
+    slope.append([0, 0])
+    stack = []
+    stack.append([x0, y0])
+    stack.append(points[slope[0][0]])
+    for i, dummy in slope:
+        x, y = points[i]
+        p1 = stack[-2]
+        p2 = stack[-1]
+        v1 = p2[0] - p1[0], p2[1] - p1[1]
+        v2 = x - p1[0], y - p1[1]
+        c = ccw(v1, v2)
+        while c <= 0:
+            stack.pop()
+            if len(stack) == 1:
+                break
+            p1 = stack[-2]
+            p2 = stack[-1]
+            v1 = p2[0] - p1[0], p2[1] - p1[1]
+            v2 = x - p1[0], y - p1[1]
+            c = ccw(v1, v2)
+        stack.append([x, y])
+    stack.pop()
+    return stack
+
+
+x1, y1, z1, x2, y2, z2 = map(int, input().split())
+x, y, z = map(int, input().split())
+
+temp = 0
+if x1 == x2:
+    temp += 1
+if y1 == y2:
+    temp += 1
+if z1 == z2:
+    temp += 1
+
+if temp >= 2:
+    print(0)
+    exit(0)
+
+if x1 == x2 == x or y1 == y2 == y or z1 == z2 == z:
+    print(0)
+    exit(0)
+
+vertex = [
+    [x1, y1, z1],
+    [x1, y1, z2],
+    [x1, y2, z1],
+    [x1, y2, z2],
+    [x2, y1, z1],
+    [x2, y1, z2],
+    [x2, y2, z1],
+    [x2, y2, z2],
+]
+
+points = []
+xyPlane = True
+for a, b, c in vertex:
+    if c >= z:
+        xyPlane = False
+    else:
+        t = z / (z - c)
+        nx = x + (a - x) * t
+        ny = y + (b - y) * t
+        points.append([nx, ny])
+
+if len(points) > 0 and not xyPlane:
+    print(-1)
+elif len(points) == 0:
+    print(0)
+else:
+    ch = convexHull(points)
+    l = len(ch)
+    points = []
+    x0, y0 = ch[0]
+    points.append([0, 0])
+    for i in range(1, l):
+        x, y = ch[i]
+        points.append([x - x0, y - y0])
+
+    part = []
+    for i in range(1, l - 1):
+        s = abs(points[i][0] * points[i + 1][1] - points[i + 1][0] * points[i][1])
+        part.append(s)
+
+    S = sum(part) / 2
+    print(S)
