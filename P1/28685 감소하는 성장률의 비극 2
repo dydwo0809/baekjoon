@@ -1,0 +1,137 @@
+import sys
+input = sys.stdin.readline
+
+
+def ccw(v1, v2):
+    return v1[0] * v2[1] - v1[1] * v2[0]
+
+
+def ccwP(p1, p2, p3):
+    v1 = [p2[0] - p1[0], p2[1] - p1[1]]
+    v2 = [p3[0] - p1[0], p3[1] - p1[1]]
+    return ccw(v1, v2)
+
+
+def halfConvexHull(points):
+    stack = []
+    stack.append(points[0])
+    stack.append(points[1])
+    for i in range(2, len(points)):
+        x, y = points[i]
+        p1 = stack[-2]
+        p2 = stack[-1]
+        v1 = p2[0] - p1[0], p2[1] - p1[1]
+        v2 = x - p1[0], y - p1[1]
+        c = ccw(v1, v2)
+        while c <= 0:
+            stack.pop()
+            if len(stack) == 1:
+                break
+            p1 = stack[-2]
+            p2 = stack[-1]
+            v1 = p2[0] - p1[0], p2[1] - p1[1]
+            v2 = x - p1[0], y - p1[1]
+            c = ccw(v1, v2)
+        stack.append([x, y])
+    return stack
+
+
+def slope(p1, p2):
+    if p1[0] == p2[0]:
+        return sys.maxsize
+    return (p2[1] - p1[1]) / (p2[0] - p1[0])
+
+
+def lin(p1, p2, x):
+    x1, y1 = p1
+    x2, y2 = p2
+    return (y2 - y1) * (x - x1) / (x2 - x1) + y1
+
+
+def check(p1, p2):
+    count = 0
+    for t in range(n):
+        temp = points[t]
+        u = [temp[0], temp[2]]
+        d = [temp[0], temp[1]]
+        if d[0] == p1[0] or d[0] == p2[0]:
+            continue
+        if u[0] == p1[0] or u[0] == p2[0]:
+            continue
+        if ccwP(p1, p2, u) == 0:
+            count += 1
+            if count > 1:
+                return False
+        if ccwP(p1, p2, u) < 0 or ccwP(p1, p2, d) > 0:
+            return False
+    return True
+
+
+def maxSlope(up, down):
+    l1 = len(down)
+    l2 = len(up)
+    j = 1
+    temp_i = 0
+    temp_j = 0
+    for i in range(l1 - 1):
+        while down[i][0] >= up[j][0]:
+            j += 1
+        while j < l2 - 1 and slope(down[i], down[i + 1]) <= slope(down[i], up[j + 1]):
+            if slope(down[i], up[j]) > slope(down[i], up[j + 1]):
+                j += 1
+            else:
+                break
+        M = slope(down[i], up[j])
+        if i == 0 and j == l2 - 1:
+            if M >= slope(down[i], down[i + 1]) and slope(up[j - 1], up[j]) <= M:
+                temp_i = i
+                temp_j = j
+                break
+
+        if j == l2 - 1:
+            if slope(down[i - 1], down[i]) >= M >= slope(down[i], down[i + 1]) and slope(up[j - 1], up[j]) <= M:
+                temp_i = i
+                temp_j = j
+                break
+
+        if i == 0:
+            if M >= slope(down[i], down[i + 1]) and slope(up[j - 1], up[j]) <= M <= slope(up[j], up[j + 1]):
+                temp_i = i
+                temp_j = j
+                break
+
+        if slope(down[i - 1], down[i]) >= M >= slope(down[i], down[i + 1]) and slope(up[j - 1], up[j]) <= M <= slope(up[j], up[j + 1]):
+            temp_i = i
+            temp_j = j
+            break
+
+    i = temp_i
+    j = temp_j
+    M = slope(down[i], up[j])
+    if check(down[i], up[j]):
+        return M
+    else:
+        return "Impossible"
+
+
+n = int(input())
+nums = list(map(int, input().split()))
+up = []
+down = []
+a = 0
+up.append([0, a + 1])
+down.append([0, a])
+points = []
+points.append([0, a, a + 1])
+for i in range(n):
+    a += nums[i]
+    up.append([i + 1, a + 1])
+    down.append([i + 1, a])
+    points.append([i + 1, a, a + 1])
+
+up = halfConvexHull(up)
+down = halfConvexHull(down[::-1])[::-1]
+
+M = maxSlope(up, down)
+
+print(M)
