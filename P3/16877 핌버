@@ -1,0 +1,41 @@
+import sys
+input = sys.stdin.readline
+
+
+def mex(check, num):
+    for i in range(len(check)):
+        if check[i] != num:
+            return i
+    return num
+
+
+fibo = [1]
+
+temp = 2
+while temp < 3 * 10 ** 6:
+    fibo.append(temp)
+    temp = fibo[-1] + fibo[-2]
+
+sg = [0] * (3 * 10 ** 6 + 1)
+check = [0] * (3 * 10 ** 6 + 1)
+
+for num in range(1, 3 * 10 ** 6 + 1):
+    for f in fibo:
+        if f > num:
+            break
+        check[sg[num - f]] = num
+
+    sg[num] = mex(check, num)
+
+
+n = int(input())
+nums = list(map(int, input().split()))
+
+answer = 0
+for i in range(n):
+    answer ^= sg[nums[i]]
+
+if answer == 0:
+    print("cubelover")
+else:
+    print("koosaga")
