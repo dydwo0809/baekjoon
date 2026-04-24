@@ -1,0 +1,82 @@
+import sys
+sys.setrecursionlimit(100002)
+
+input = sys.stdin.readline
+
+
+def update_lazy(tree, lazy, node, start, end):
+    if lazy[node] != 0:
+        tree[node] += (end - start + 1) * lazy[node]
+        if start != end:
+            lazy[node * 2] += lazy[node]
+            lazy[node * 2 + 1] += lazy[node]
+        lazy[node] = 0
+
+
+def update(tree, lazy, node, start, end, left, right, val):
+    update_lazy(tree, lazy, node, start, end)
+
+    if right < start or left > end:
+        return
+
+    if left <= start and end <= right:
+        tree[node] += (end - start + 1) * val
+        if start != end:
+            lazy[node * 2] += val
+            lazy[node * 2 + 1] += val
+        return
+
+    update(tree, lazy, node * 2, start, (start+end) // 2, left, right, val)
+    update(tree, lazy, node * 2 + 1, (start+end) // 2 + 1, end, left, right, val)
+
+    tree[node] = tree[node * 2] + tree[node * 2 + 1]
+
+
+def query(tree, lazy, node, start, end, left, right):
+    update_lazy(tree, lazy, node, start, end)
+
+    if left > end or right < start:
+        return 0
+
+    if left <= start and end <= right:
+        return tree[node]
+
+    l = query(tree, lazy, node * 2, start, (start + end) // 2, left, right)
+    r = query(tree, lazy, node * 2 + 1, (start + end) // 2 + 1, end, left, right)
+    return l + r
+
+
+def dfs(graph, euler, v, order):
+    global count
+    count += 1
+    order[count] = v
+    euler[v][0] = count
+
+    for nv in graph[v]:
+        dfs(graph, euler, nv, order)
+
+    euler[v][1] = count
+
+
+n, m = map(int, input().split())
+head = list(map(int, input().split()))
+graph = [[] for i in range(n + 1)]
+for i in range(1, n):
+    graph[head[i]].append(i + 1)
+
+euler = [[0, 0] for i in range(n + 1)]
+count = 0
+order = [0] * (n + 1)
+dfs(graph, euler, 1, order)
+
+tree_size = (n + 1) * 4
+tree = [0] * tree_size
+lazy = [0] * tree_size
+
+for i in range(m):
+    w, *q = map(int, input().split())
+    if w == 1:
+        l, r = euler[q[0]]
+        update(tree, lazy, 1, 1, n, l, r, q[1])
+    else:
+        print(query(tree, lazy, 1, 1, n, euler[q[0]][0], euler[q[0]][0]))
