@@ -1,0 +1,25 @@
+import sys
+input = sys.stdin.readline
+
+
+n = int(input())
+
+sg = [0] * (n + 1)
+sg[2] = 1
+for i in range(3, n + 1):
+    s = set()
+    for j in range(i // 2 + 1):
+        s.add(sg[j] ^ sg[i - j - 2])
+
+    l = sorted(s)
+    for j in range(len(l)):
+        if l[j] != j:
+            sg[i] = j
+            break
+    else:
+        sg[i] = l[-1] + 1
+
+if sg[n] == 0:
+    print(2)
+else:
+    print(1)
