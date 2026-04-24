@@ -1,0 +1,112 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+double m = DBL_MAX;
+
+double dist(pair<int, int> p1, pair<int, int> p2, pair<int, int> p3){
+	if (p1.first == p2.first){
+		return abs(p3.first - p1.first);
+	}
+	int a = p2.second - p1.second;
+	int b = p2.first - p1.first;
+	long long int c = -(long long int)a * p1.first + (long long int)b * p1.second;
+
+	long long int up = abs((long long int)a * p3.first - (long long int)b * p3.second + (long long int)c);
+	double down = sqrt(pow(a, 2) + pow(b, 2));
+
+	return  up / down;
+}
+
+double slope(pair<int, int> p1, pair<int, int> p2){
+	assert(p1.first != p2.first);
+	return (p2.second - p1.second) / (double)(p2.first - p1.first);
+}
+
+double degree(pair<int, int> p0, pair<int, int> p){
+	int x0 = p0.first;
+	int y0 = p0.second;
+	int x = p.first;
+	int y = p.second;
+
+	if (x == x0){
+		if (y > y0){
+			return 90;
+		}
+		else{
+			return 270;
+		}
+	}
+	if (y == y0){
+		if ( x > x0){
+			return 0;
+		}
+		else{
+			return 180;
+		}
+	}
+	double s = atan(slope(p0, p)) * 180 / M_PI;
+
+	if (x > x0 and y > y0){
+		return s;
+	}
+	else if (x < x0 and y > y0){
+		return s + 180;
+	}
+	else if (x < x0 and y < y0){
+		return s + 180;
+	}
+	else{
+		return s + 360;
+	}
+}
+
+double shortest(vector<pair<int,int>> &points, pair<int, int> p0){
+	vector<pair<double, pair<int, int>>> order;
+	for (auto [x, y]: points){
+		if (x == p0.first and y == p0.second){
+			continue;
+		}
+		double s = degree(p0, {x, y});
+		order.push_back({s, {x, y}});
+	}
+	sort(order.begin(), order.end());
+	for (int i = 0; i < order.size(); i++){
+		pair<int, int> p1 = order[i].second;
+		pair<int, int> p2 = order[(i + 1) % order.size()].second;
+		double d1 = dist(p0, p1, p2);
+		double d2 = dist(p0, p2, p1);
+		if (d1 < m){
+			m = d1;
+		}
+		if (d2 < m){
+			m = d2;
+		}
+	}
+	return m;
+}
+
+int main() {
+	ios_base::sync_with_stdio(false);
+	cin.tie(0);
+	int n;
+	cin >> n;
+	vector<pair<int,int>> points(n);
+
+	for (int i = 0; i < n; i++){
+		int a, b;
+		cin >> a >> b;
+		points[i].first = a;
+		points[i].second = b;
+	}
+
+	for (int i = 0; i < n; i++){
+		pair<int, int> p0 = points[i];
+		double temp_m = shortest(points, p0);
+		if (temp_m < m){
+			m = temp_m;
+		}
+	}
+	cout << fixed;
+	cout.precision(8);
+	cout << m;
+}
