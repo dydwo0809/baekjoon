@@ -1,0 +1,41 @@
+import sys
+input = sys.stdin.readline
+
+n = int(input())
+WB = []
+wb = input().strip()
+score = list(map(int, input().split()))
+for i in range(n):
+    WB.append([wb[i], score[i]])
+
+order = []
+color = WB[0][0]
+m = WB[0][1]
+for i in range(1, n - 1):
+    c, v = WB[i]
+    if c != color:
+        order.append([color, m])
+        color = c
+        m = v
+    else:
+        if v > m:
+            m = v
+else:
+    c, v = WB[n - 1]
+    if c != color:
+        order.append([color, m])
+        color = c
+        m = v
+        order.append([color, m])
+    else:
+        if v > m:
+            m = v
+        order.append([color, m])
+order.pop()
+if order:
+    del order[0]
+order.sort(key=lambda x: x[1], reverse=True)
+answer = 0
+for i in range((len(order) + 1) // 2):
+    answer += order[i][1]
+print(answer)
