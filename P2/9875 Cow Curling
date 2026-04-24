@@ -1,0 +1,140 @@
+import sys
+input = sys.stdin.readline
+import math
+
+
+def vector(p1, p2):
+    return [p2[0] - p1[0], p2[1] - p1[1]]
+
+
+def ccw(v1, v2):
+    return v1[0] * v2[1] - v1[1] * v2[0]
+
+
+def ccwP(p1, p2, p3):
+    v1 = [p2[0] - p1[0], p2[1] - p1[1]]
+    v2 = [p3[0] - p1[0], p3[1] - p1[1]]
+    return ccw(v1, v2)
+
+
+def convexHull(points):
+    points.sort(key=lambda x: (x[1], x[0]))
+    x0, y0 = points[0]
+    slope = []
+    for i in range(1, len(points)):
+        x, y = points[i]
+        if x == x0:
+            slope.append([i, 90])
+        else:
+            temp = math.degrees(math.atan((y - y0) / (x - x0)))
+            if temp < 0:
+                temp = 180 + temp
+            slope.append([i, temp])
+    slope.sort(key=lambda x: x[1])
+    slope.append([0, 0])
+    stack = []
+    stack.append([x0, y0])
+    stack.append(points[slope[0][0]])
+    for i, dummy in slope:
+        x, y = points[i]
+        p1 = stack[-2]
+        p2 = stack[-1]
+        v1 = p2[0] - p1[0], p2[1] - p1[1]
+        v2 = x - p1[0], y - p1[1]
+        c = ccw(v1, v2)
+        while c <= 0:
+            stack.pop()
+            if len(stack) == 1:
+                break
+            p1 = stack[-2]
+            p2 = stack[-1]
+            v1 = p2[0] - p1[0], p2[1] - p1[1]
+            v2 = x - p1[0], y - p1[1]
+            c = ccw(v1, v2)
+        stack.append([x, y])
+    stack.pop()
+
+    return stack
+
+
+def partInside(p, ch, s, e):
+    l = len(ch)
+    if e - s <= 3:
+        for i in range(s, e):
+            p1 = ch[i]
+            p2 = ch[(i + 1) % l]
+            c = ccwP(p1, p2, p)
+            if c < 0:
+                return False
+        return True
+
+    mid = (s + e) // 2
+    p1 = ch[s]
+    p2 = ch[mid]
+    p3 = ch[e]
+    c1 = ccwP(p1, p2, p)
+    c2 = ccwP(p2, p3, p)
+    if c1 >= 0 and c2 >= 0:
+        return True
+    if c1 >= 0 and c2 < 0:
+        return partInside(p, ch, mid, e)
+    if c1 < 0 and c2 >= 0:
+        return partInside(p, ch, s, mid)
+    else:
+        return False
+
+
+def inside(p, ch):
+    if len(ch) == 2:
+        p1 = ch[0]
+        p2 = ch[1]
+        if ccwP(p1, p2, p) == 0 and (p1[0] <= p[0] <= p2[0] or p1[0] >= p[0] >= p2[0]) and (p1[1] <= p[1] <= p2[1] or p1[1] >= p[1] >= p2[1]):
+            return True
+        return False
+
+    if len(ch) == 3:
+        p1 = ch[0]
+        p2 = ch[1]
+        p3 = ch[2]
+        if ccwP(p1, p2, p) >= 0 and ccwP(p2, p3, p) >= 0 and ccwP(p3, p1, p) >= 0:
+            return True
+        return False
+
+    l = len(ch)
+    p1 = ch[l - 1]
+    p2 = ch[0]
+    c = ccwP(p1, p2, p)
+    if c < 0:
+        return False
+
+    return partInside(p, ch, 0, l - 1)
+
+
+n = int(input())
+points1 = []
+for i in range(n):
+    points1.append(list(map(int, input().split())))
+
+points2 = []
+for i in range(n):
+    points2.append(list(map(int, input().split())))
+
+ch1 = convexHull(points1)
+ch2 = convexHull(points2)
+
+if len(ch1) == 1:
+    ch1.append(points1[-1])
+if len(ch2) == 1:
+    ch2.append(points2[-1])
+
+score1 = 0
+for p in points2:
+    if inside(p, ch1):
+        score1 += 1
+
+score2 = 0
+for p in points1:
+    if inside(p, ch2):
+        score2 += 1
+
+print(score1, score2)
