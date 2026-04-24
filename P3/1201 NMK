@@ -1,0 +1,32 @@
+def reverse(nums, s, e):
+    while s < e:
+        nums[s], nums[e] = nums[e], nums[s]
+        s += 1
+        e -= 1
+
+
+n, m, k = map(int, input().split())
+nums = [i for i in range(1, n + 1)]
+if m * k < n or n < k + m - 1:
+    print(-1)
+    exit(0)
+
+if m == 1 and k == n:
+    reverse(nums, 0, n - 1)
+    print(*nums)
+    exit(0)
+
+reverse(nums, 0, k - 1)
+p = (n - k) // (m - 1) + 1
+r = (n - k) % (m - 1)
+s = k
+for i in range(r):
+    reverse(nums, s, s + p - 1)
+    s += p
+
+p -= 1
+for i in range(m - 1 - r):
+    reverse(nums, s, s + p - 1)
+    s += p
+
+print(*nums)
