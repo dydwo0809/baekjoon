@@ -1,0 +1,45 @@
+import sys
+input = sys.stdin.readline
+
+
+def dist2(p1, p2):
+    return ((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2) ** (1/2)
+
+
+n = int(input())
+points = []
+sumX = 0
+sumY = 0
+for i in range(n):
+    x, y = map(int, input().split())
+    sumX += x
+    sumY += y
+    points.append([x, y])
+
+x = sumX / n
+y = sumY / n
+
+lr = dist2([x, y], points[0])
+ds = [0] * n
+for epoch in range(1000):
+    p = [x, y]
+    for i in range(n):
+        d = dist2(p, points[i])
+        ds[i] = d
+    pdx = [0] * n
+    pdy = [0] * n
+    for i in range(n):
+        d = ds[i]
+        if d == 0:
+            d = 10 ** (-7)
+        pdx[i] = (x - points[i][0]) / d
+        pdy[i] = (y - points[i][1]) / d
+
+    x -= sum(pdx) * lr
+    y -= sum(pdy) * lr
+
+    if epoch % 100 == 0:
+        lr /= 10
+
+answer = sum(ds)
+print(round(answer))
