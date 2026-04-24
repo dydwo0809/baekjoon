@@ -1,0 +1,52 @@
+import sys
+input = sys.stdin.readline
+
+
+def dist2(p1, p2):
+    return (p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2
+
+
+def S(p1, p2, p3):
+    x1 = p1[0] - p3[0]
+    y1 = p1[1] - p3[1]
+    x2 = p2[0] - p3[0]
+    y2 = p2[1] - p3[1]
+    return abs(x1 * y2 - x2 * y1)
+
+
+n = int(input())
+points = []
+for i in range(n):
+    x, y = map(int, input().split())
+    points.append([x, y])
+
+diagonal2 = []
+for i in range(n - 1):
+    for j in range(i + 1, n):
+        p1 = points[i]
+        p2 = points[j]
+        x = p1[0] + p2[0]
+        y = p1[1] + p2[1]
+        d = dist2(p1, p2)
+        temp = [d, x, y, i, j]
+        diagonal2.append(temp)
+
+diagonal2.sort(key=lambda x: (x[0], x[1], x[2]))
+answer = 0
+l = len(diagonal2)
+for t in range(l - 1):
+    d1, x1, y1, i1, j1 = diagonal2[t]
+    next = t + 1
+    while next < l:
+        d2, x2, y2, i2, j2 = diagonal2[next]
+        if d1 == d2 and x1 == x2 and y1 == y2:
+            p1 = points[i1]
+            p2 = points[j1]
+            p3 = points[i2]
+            s = S(p1, p2, p3)
+            if s > answer:
+                answer = s
+        else:
+            break
+        next += 1
+print(answer)
