@@ -1,0 +1,50 @@
+import sys
+input = sys.stdin.readline
+
+
+n, k = map(int, input().split())
+nums = [0] + list(map(int, input().split()))
+m = int(input())
+query = []
+block = int(n ** 0.5)
+for i in range(m):
+    a, b = map(int, input().split())
+    query.append([a, b, i, a // block])
+
+query.sort(key=lambda x: (x[3], x[1]))
+
+answer = [0] * m
+px = []
+tmp = 0
+for num in nums:
+    tmp ^= num
+    px.append(tmp)
+
+cnt = [0] * 2000001
+l, r = 1, 0
+s = 0
+for a, b, idx, dummy in query:
+    while a - 1 < l:
+        l -= 1
+        s += cnt[px[l] ^ k]
+        cnt[px[l]] += 1
+
+    while a - 1 > l:
+        cnt[px[l]] -= 1
+        s -= cnt[px[l] ^ k]
+        l += 1
+
+    while b < r:
+        cnt[px[r]] -= 1
+        s -= cnt[px[r] ^ k]
+        r -= 1
+
+    while b > r:
+        r += 1
+        s += cnt[px[r] ^ k]
+        cnt[px[r]] += 1
+
+    answer[idx] = s
+
+for ans in answer:
+    print(ans)
