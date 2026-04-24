@@ -1,0 +1,42 @@
+import sys
+input = sys.stdin.readline
+
+n = int(input())
+nums = list(map(int, input().split()))
+
+if n == 1:
+    if nums[0] == 1:
+        print("cubelover")
+    else:
+        print("koosaga")
+    exit(0)
+
+one = 0
+for i in nums:
+    if i == 1:
+        one += 1
+
+if one == n:
+    if one % 2 == 1:
+        print("cubelover")
+    else:
+        print("koosaga")
+elif one % 2 == 1 or one == 0:
+    xor = 0
+    for i in nums:
+        xor ^= i
+    if xor == 0:
+        print("cubelover")
+    else:
+        print("koosaga")
+else:
+    for i in range(n):
+        if nums[i] != 1:
+            nums[i] = 1
+    xor = 0
+    for i in nums:
+        xor ^= i
+    if xor == 0:
+        print("cubelover")
+    else:
+        print("koosaga")
