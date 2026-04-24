@@ -1,0 +1,95 @@
+import sys
+input = sys.stdin.readline
+import math
+
+
+def vector(p1, p2):
+    return [p2[0] - p1[0], p2[1] - p1[1]]
+
+
+def ccw(v1, v2):
+    return v1[0] * v2[1] - v1[1] * v2[0]
+
+
+def dist2(p1, p2):
+    return (p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2
+
+
+def convexHull(points):
+    points.sort(key=lambda x: (x[1], x[0]))
+    x0, y0 = points[0]
+    slope = []
+    for i in range(1, len(points)):
+        x, y = points[i]
+        if x == x0:
+            slope.append([i, 90])
+        else:
+            temp = math.degrees(math.atan((y - y0) / (x - x0)))
+            if temp < 0:
+                temp = 180 + temp
+            slope.append([i, temp])
+    slope.sort(key=lambda x: x[1])
+    slope.append([0, 0])
+    stack = []
+    stack.append([x0, y0])
+    stack.append(points[slope[0][0]])
+    for i, dummy in slope:
+        x, y = points[i]
+        p1 = stack[-2]
+        p2 = stack[-1]
+        v1 = p2[0] - p1[0], p2[1] - p1[1]
+        v2 = x - p1[0], y - p1[1]
+        c = ccw(v1, v2)
+        while c <= 0:
+            stack.pop()
+            if len(stack) == 1:
+                break
+            p1 = stack[-2]
+            p2 = stack[-1]
+            v1 = p2[0] - p1[0], p2[1] - p1[1]
+            v2 = x - p1[0], y - p1[1]
+            c = ccw(v1, v2)
+        stack.append([x, y])
+    stack.pop()
+    return stack
+
+
+n = int(input())
+points = []
+for i in range(n):
+    x, y = map(int, input().split())
+    points.append([x, y])
+
+ch = convexHull(points)
+l = len(ch)
+if l == 1:
+    ch.append(points[-1])
+    d = dist2(ch[0], ch[1]) ** (1/2)
+    print(d)
+    exit(0)
+dists = []
+for i in range(l):
+    d = dist2(ch[i], ch[(i + 1) % l]) ** (1/2)
+    dists.append(d)
+
+answer = sys.maxsize
+j = 1
+temp = 0
+for i in range(l):
+    p1 = ch[i]
+    p2 = ch[(i + 1) % l]
+    p3 = ch[j]
+    p4 = ch[(j + 1) % l]
+    v1 = vector(p1, p2)
+    v2 = vector(p3, p4)
+    while ccw(v1, v2) >= 0:
+        temp += dists[j]
+        j = (j + 1) % l
+        p3 = ch[j]
+        p4 = ch[(j + 1) % l]
+        v2 = vector(p3, p4)
+    if answer > temp:
+        answer = temp
+    temp -= dists[(i + 1) % l]
+
+print(answer)
