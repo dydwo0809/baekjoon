@@ -1,0 +1,85 @@
+import sys
+input = sys.stdin.readline
+import math
+
+
+def ccw(v1, v2):
+    return v1[0] * v2[1] - v1[1] * v2[0]
+
+
+def ccwP(p1, p2, p3):
+    v1 = [p2[0] - p1[0], p2[1] - p1[1]]
+    v2 = [p3[0] - p1[0], p3[1] - p1[1]]
+    return ccw(v1, v2)
+
+
+def convexHull(points):
+    points.sort(key=lambda x: (x[1], x[0]))
+    x0, y0 = points[0]
+    slope = []
+    for i in range(1, len(points)):
+        x, y = points[i]
+        if x == x0:
+            slope.append([i, 90])
+        else:
+            temp = math.degrees(math.atan((y - y0) / (x - x0)))
+            if temp < 0:
+                temp = 180 + temp
+            slope.append([i, temp])
+    slope.sort(key=lambda x: x[1])
+    slope.append([0, 0])
+    stack = []
+    remain = []
+    stack.append([x0, y0])
+    stack.append(points[slope[0][0]])
+    for i, dummy in slope:
+        x, y = points[i]
+        p1 = stack[-2]
+        p2 = stack[-1]
+        v1 = p2[0] - p1[0], p2[1] - p1[1]
+        v2 = x - p1[0], y - p1[1]
+        c = ccw(v1, v2)
+        while c <= 0:
+            remain.append(stack.pop())
+            if len(stack) == 1:
+                break
+            p1 = stack[-2]
+            p2 = stack[-1]
+            v1 = p2[0] - p1[0], p2[1] - p1[1]
+            v2 = x - p1[0], y - p1[1]
+            c = ccw(v1, v2)
+        stack.append([x, y])
+    stack.pop()
+    del [remain[0]]
+    return stack, remain
+
+
+def inside(p, ch):
+    l = len(ch)
+    if l <= 2:
+        return False
+    for i in range(l):
+        p1, p2 = ch[i], ch[(i + 1) % l]
+        if ccwP(p1, p2, p) <= 0:
+            return False
+    return True
+
+
+n, x, y = map(int, input().split())
+p = [x, y]
+points = []
+for i in range(n):
+    x, y = map(int, input().split())
+    points.append([x, y])
+
+answer = 0
+while True:
+    ch, points = convexHull(points)
+    if inside(p, ch):
+        answer += 1
+    else:
+        break
+    if len(points) <= 2:
+        break
+        
+print(answer)
