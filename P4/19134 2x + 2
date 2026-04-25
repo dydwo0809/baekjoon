@@ -1,0 +1,9 @@
+def rec(n, ox):
+    if n <= 3:
+        return n * ox
+    return (n - n // 2 + 1) * ox + rec(n // 2 - 1, 1 - ox)
+
+
+n = int(input())
+answer = rec(n, 1)
+print(answer)
