@@ -1,0 +1,99 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+typedef long long ll;
+
+
+bool cmp(vector<ll> &v1, vector<ll> &v2){
+  if(v1[0] == v2[0]) {
+    return v1[1] > v2[1];
+  }
+  else {
+      return v1[0] < v2[0];
+  }
+}
+
+
+void update(vector<ll> &tree, int node, int start, int end, int index, ll val) {
+    if (index < start || index > end) {
+        return;
+    }
+    if (start == end) {
+        tree[node] += val;
+        return;
+    }
+    update(tree, node * 2, start, (start+end) / 2, index, val);
+    update(tree, node * 2 + 1, (start+end) / 2 + 1, end, index, val);
+
+    tree[node] = tree[node * 2] + tree[node * 2 + 1];
+}
+
+
+ll query(vector<ll> &tree, int node, int start, int end, int left, int right) {
+    if (left > end || right < start) {
+        return 0;
+    }
+    if (left <= start && end <= right) {
+        return tree[node];
+    }
+    ll l = query(tree, node * 2, start, (start+end) / 2, left, right);
+    ll r = query(tree, node * 2 + 1, (start+end) / 2 + 1, end, left, right);
+    return l + r;
+}
+
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(0);
+    cout.tie(0);
+
+    int n;
+    cin >> n;
+
+    vector<vector<ll>> temp(n, vector<ll>(2));
+
+    for (int i = 0; i < n; i++){
+        cin >> temp[i][0];
+    }
+
+    for (int i = 0; i < n; i++){
+        cin >> temp[i][1];
+    }
+
+    sort(temp.begin(), temp.end(), cmp);
+
+    vector<ll> s(n);
+    for (int i = 0; i < n; i++){
+        s[i] = temp[i][1];
+    }
+
+    int N = 1000000;
+    int tree_size = N * 3;
+    vector<ll> tree(tree_size);
+
+    vector<ll> s2(n);
+    for (int i = 0; i < n; i++){
+        if (s[i] == 0){
+            update(tree, 1, 0, N, 0, 1);
+            s2[i] = 0;
+            continue;
+        }
+        update(tree, 1, 0, N, s[i], 1);
+        s2[i] = query(tree, 1, 0, N, 0, s[i] - 1);
+    }
+
+    fill(tree.begin(), tree.end(), 0);
+
+    ll answer = 0;
+    for (int i = 0; i < n; i++){
+        if (s[i] == 0){
+            continue;
+        }
+        update(tree, 1, 0, N, s[i], s2[i]);
+        answer += query(tree, 1, 0, N, 0, s[i] - 1);
+    }
+
+    cout << answer;
+
+   return 0;
+}
