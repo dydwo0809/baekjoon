@@ -1,0 +1,53 @@
+import sys
+input = sys.stdin.readline
+import math
+
+
+def makeSeg(seg, index, s, e, i):
+    seg[i] = [s, e, 0]
+    if s == e:
+        index[s] = i
+        return
+    temp = (s + e) // 2
+    makeSeg(seg, index, s, temp, 2 * i)
+    makeSeg(seg, index, temp + 1, e, 2 * i + 1)
+
+
+def chamgeSeg(seg, index, i, val):
+    i = index[i]
+    seg[i][2] = val
+    i //= 2
+    while i > 0:
+        seg[i][2] = max(seg[2 * i][2], seg[2 * i + 1][2])
+        i //= 2
+
+
+def queryMax(seg, s, e, i):
+    if s == seg[i][0] and e == seg[i][1]:
+        return seg[i][2]
+    temp = (seg[i][0] + seg[i][1]) // 2
+    if e <= temp:
+        return queryMax(seg, s, e, 2 * i)
+    if s > temp:
+        return queryMax(seg, s, e, 2 * i + 1)
+    return max(queryMax(seg, s, temp, 2 * i), queryMax(seg, temp + 1, e, 2 * i + 1))
+
+
+n, m = map(int, input().split())
+
+temp = math.ceil(math.log2(n)) + 1
+seg = [[] for i in range(2 ** temp)]
+index = [0] * (n + 1)
+makeSeg(seg, index, 1, n, 1)
+
+nums = list(map(int, input().split()))
+for i in range(1, n + 1):
+    num = nums[i - 1]
+    chamgeSeg(seg, index, i, num)
+
+answer = []
+for i in range(1, n - 2 * m + 3):
+    a = i
+    b = i + 2 * (m - 1)
+    answer.append(queryMax(seg, a, b, 1))
+print(*answer)
