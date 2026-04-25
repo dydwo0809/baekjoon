@@ -1,0 +1,72 @@
+import sys
+
+input = sys.stdin.readline
+
+
+def init(a, tree, node, start, end):
+    if start == end:
+        tree[node] = a[start]
+    else:
+        init(a, tree, node * 2, start, (start + end) // 2)
+        init(a, tree, node * 2 + 1, (start + end) // 2 + 1, end)
+        tree[node] = tree[node * 2] + tree[node * 2 + 1]
+
+
+def update_lazy(tree, lazy, node, start, end):
+    if lazy[node] != 0:
+        tree[node] += (end - start + 1) * lazy[node]
+        if start != end:
+            lazy[node * 2] += lazy[node]
+            lazy[node * 2 + 1] += lazy[node]
+        lazy[node] = 0
+
+
+def update(tree, lazy, node, start, end, left, right, val):
+    update_lazy(tree, lazy, node, start, end)
+
+    if right < start or left > end:
+        return
+
+    if left <= start and end <= right:
+        tree[node] += (end - start + 1) * val
+        if start != end:
+            lazy[node * 2] += val
+            lazy[node * 2 + 1] += val
+        return
+
+    update(tree, lazy, node * 2, start, (start+end) // 2, left, right, val)
+    update(tree, lazy, node * 2 + 1, (start+end) // 2 + 1, end, left, right, val)
+
+    tree[node] = tree[node * 2] + tree[node * 2 + 1]
+
+
+def query(tree, lazy, node, start, end, left, right):
+    update_lazy(tree, lazy, node, start, end)
+
+    if left > end or right < start:
+        return 0
+
+    if left <= start and end <= right:
+        return tree[node]
+
+    l = query(tree, lazy, node * 2, start, (start + end) // 2, left, right)
+    r = query(tree, lazy, node * 2 + 1, (start + end) // 2 + 1, end, left, right)
+    return l + r
+
+
+n, m, k = map(int, input().split())
+a = [int(input()) for i in range(n)]
+tree_size = n * 4
+tree = [0] * tree_size
+lazy = [0] * tree_size
+
+init(a, tree, 1, 0, n - 1)
+
+for _ in range(m + k):
+    w = list(map(int, input().split()))
+    if w[0] == 1:
+        b, c, d = w[1], w[2], w[3]
+        update(tree, lazy, 1, 0, n - 1, b - 1, c - 1, d)
+    else:
+        b, c = w[1], w[2]
+        print(query(tree, lazy, 1, 0, n - 1, b - 1, c - 1))
