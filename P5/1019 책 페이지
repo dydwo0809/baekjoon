@@ -1,0 +1,36 @@
+def std(k):
+    return k * 10 ** (k - 1)
+
+
+def full_add(a, answer):
+    for i in range(10):
+        answer[i] += a
+
+
+def full(s, answer):
+    num = int(s)
+    l = len(s)
+    curr = int(s[0])
+    if l == 1:
+        for i in range(num + 1):
+            answer[i] += 1
+        return
+
+    temp = 10 ** (l - 1)
+    for i in range(curr):
+        answer[i] += temp
+    full_add(curr * std(l - 1), answer)
+
+    nn = s[1:]
+    answer[curr] += int(nn) + 1
+    full(nn, answer)
+
+
+answer = [0 for i in range(10)]
+n = int(input())
+full(str(n), answer)
+
+l = len(str(n))
+sub = int("1" * l)
+answer[0] -= sub
+print(*answer)
