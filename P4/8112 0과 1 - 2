@@ -1,0 +1,41 @@
+import sys
+from collections import deque
+
+input = sys.stdin.readline
+
+
+def back(visit, prev, v):
+    answer = ""
+    i = v
+    while i != 1:
+        answer += str(visit[i])
+        i = prev[i]
+    answer += "1"
+    return answer[::-1]
+
+
+def bfs(n):
+    q = deque()
+    visit = [-1] * (n + 1)
+    prev = [-1] * (n + 1)
+    visit[1] = 1
+    q.append(1)
+    while q:
+        v = q.popleft()
+        if v % n == 0:
+            return back(visit, prev, v)
+        for i in range(2):
+            nv = (10 * v + i) % n
+            if visit[nv] == -1:
+                visit[nv] = i
+                prev[nv] = v
+                q.append(nv)
+
+    return "BRAK"
+
+
+t = int(input())
+for tt in range(t):
+    n = int(input())
+    answer = bfs(n)
+    print(answer)
