@@ -1,0 +1,106 @@
+import sys
+input = sys.stdin.readline
+
+
+def cross(x1, y1, x2, y2, x3, y3, x4, y4):
+    if x1 == x2:
+        x = x1
+        y = (y4 - y3) * (x - x3) / (x4 - x3) + y3
+
+    elif x3 == x4:
+        x = x3
+        y = (y2 - y1) * (x - x1) / (x2 - x1) + y1
+
+    else:
+        x = ((y4 - y3) * x3 / (x4 - x3) - (y2 - y1) * x1 / (x2 - x1) + y1 - y3) / ((y4 - y3) / (x4 - x3) - (y2 - y1) / (x2 - x1))
+        y = (y2 - y1) * (x - x1) / (x2 - x1) + y1
+
+    return x, y
+
+
+def check(x, y, x1, y1, x2, y2, x3, y3, x4, y4 ):
+    if not min(x1, x2) - 0.0000001 <= x <= max(x1, x2) + 0.0000001:
+        return 0
+    if not min(x3, x4) - 0.0000001 <= x <= max(x3, x4) + 0.0000001:
+        return 0
+    if not min(y1, y2) - 0.0000001 <= y <= max(y1, y2) + 0.0000001:
+        return 0
+    if not min(y3, y4) - 0.0000001 <= y <= max(y3, y4) + 0.0000001:
+        return 0
+    if -0.0000001 <= xmin - x <= 0.0000001 or -0.0000001 <= xmax - x <= 0.0000001:
+        if -0.0000001 <= ymin - y <= 0.0000001 or -0.0000001 <= ymax - y <= 0.0000001:
+            return 0.5
+    return 1
+
+
+def intersect(x1, y1, x2, y2, x3, y3, x4, y4):
+    if x1 == x2 and x3 == x4:
+        if x1 == x3:
+            if max(y1, y2) < min(y3, y4):
+                return 0
+            elif max(y3, y4) < min(y1, y2):
+                return 0
+            else:
+                return 1
+        else:
+            return 0
+
+    elif (y2 - y1) * (x4 - x3) == (y4 - y3) * (x2 - x1):
+        if (y3 - y1) * (x2 - x1) == (y2 - y1) * (x3 - x1):
+            if max(x1, x2) < min(x3, x4):
+                return 0
+            elif max(x3, x4) < min(x1, x2):
+                return 0
+            else:
+                return 1
+        else:
+            return 0
+
+    else:
+        x, y = cross(x1, y1, x2, y2, x3, y3, x4, y4)
+        return check(x, y, x1, y1, x2, y2, x3, y3, x4, y4)
+
+
+def inf(a1, a2, amin, amax):
+    a1, a2 = min(a1, a2), max(a1, a2)
+    if a2 < amin or amax < a1:
+        return 0
+    elif amax == a1 or amin == a2:
+        return 1
+    else:
+        return 4
+
+
+t = int(input())
+head = [i for i in range(t + 1)]
+for i in range(t):
+    xmin, ymin, xmax, ymax = map(int, input().split())
+    x1, y1, x2, y2 = map(int, input().split())
+    answer = 0
+    if y1 == y2:
+        if y1 == ymin or y1 == ymax:
+            print(inf(x1, x2, xmin, xmax))
+            continue
+        else:
+            if ymin < y1 < ymax:
+                if min(x1, x2) <= xmin <= max(x1, x2):
+                    answer += 1
+                if min(x1, x2) <= xmax <= max(x1, x2):
+                    answer += 1
+    elif x1 == x2:
+        if x1 == xmin or x1 == xmax:
+            print(inf(y1, y2, ymin, ymax))
+            continue
+        else:
+            if xmin < x1 < xmax:
+                if min(y1, y2) <= ymin <= max(y1, y2):
+                    answer += 1
+                if min(y1, y2) <= ymax <= max(y1, y2):
+                    answer += 1
+    else:
+        answer += intersect(x1, y1, x2, y2, xmin, ymin, xmin, ymax)
+        answer += intersect(x1, y1, x2, y2, xmin, ymin, xmax, ymin)
+        answer += intersect(x1, y1, x2, y2, xmax, ymax, xmin, ymax)
+        answer += intersect(x1, y1, x2, y2, xmax, ymin, xmax, ymax)
+
+    print(int(answer))
