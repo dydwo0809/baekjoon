@@ -1,0 +1,50 @@
+import sys
+input = sys.stdin.readline
+
+
+def check(stack, num):
+    if stack[-1] == num:
+        return False
+    if len(stack) <= 1:
+        stack.append(num)
+        return True
+    d = stack[-1] - stack[-2]
+    if num - stack[-1] == d:
+        stack.append(num)
+        return True
+    else:
+        return False
+
+
+n = int(input())
+nums = list(map(int, input().split()))
+nums.sort()
+
+m = nums[0]
+stack1 = [m]
+stack2 = [m]
+for i in range(1, n):
+    if check(stack1, nums[i]):
+        continue
+    if not check(stack2, nums[i]):
+        p = stack1.pop()
+        stack3 = [nums[i]]
+        while stack2:
+            temp = stack2.pop()
+            if p < temp:
+                stack3.append(temp)
+            else:
+                if not check(stack3, p):
+                    print("No")
+                    exit(0)
+                stack2.append(temp)
+                while stack2:
+                    temp = stack2.pop()
+                    if not check(stack3, temp):
+                        print("No")
+                        exit(0)
+                stack2 = stack3[::-1]
+                break
+
+print("Yes")
+
