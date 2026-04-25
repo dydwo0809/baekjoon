@@ -1,0 +1,62 @@
+import sys
+input = sys.stdin.readline
+sys.setrecursionlimit(10000)
+
+g = []
+AP = set()
+visit = []
+prev = []
+m = []
+order = 1
+
+def dfs(i):
+    global order
+    visit[i] = order
+    order += 1
+    m[i] = order
+
+    child = 0
+    for j in g[i]:
+        if j == prev[i]:
+            continue
+        if visit[j] == 0:
+            prev[j] = i
+            child += 1
+            dfs(j)
+            if prev[i] == 0 and child >= 2:
+                AP.add(i)
+            elif prev[i] > 0 and m[j] >= visit[i]:
+                AP.add(i)
+
+            m[i] = min(m[i], m[j])
+        else:
+            m[i] = min(m[i], visit[j])
+
+
+v, e = map(int, input().split())
+
+g = [[] for i in range(v + 1)]
+for i in range(e):
+    a, b = map(int, input().split())
+    g[a].append(b)
+    g[b].append(a)
+
+AP = set()
+visit = [0] * (v + 1)
+prev = [0] * (v + 1)
+m = [0] * (v + 1)
+order = 1
+
+for i in range(1, v + 1):
+    if visit[i] == 0:
+        dfs(i)
+#
+# print("g", g)
+# print("AP", AP)
+# print("visit", visit)
+# print("prev", prev)
+# print("m", m)
+
+answer = sorted(AP)
+print(len(answer))
+print(" ".join(map(str, answer)))
