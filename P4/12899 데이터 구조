@@ -1,0 +1,45 @@
+import sys
+
+input = sys.stdin.readline
+
+
+def update(a, tree, node, start, end, index, val):
+    if index < start or index > end:
+        return
+    if start == end:
+        a[start] += val
+        tree[node] += val
+        return
+    update(a, tree, node * 2, start, (start+end) // 2, index, val)
+    update(a, tree, node * 2 + 1, (start+end) // 2 + 1, end, index, val)
+
+    tree[node] = tree[node * 2] + tree[node * 2 + 1]
+
+
+def query(tree, node, start, end, order):
+    tree[node] -= 1
+
+    if start == end:
+        a[start] -= 1
+        return start
+
+    l = tree[node * 2]
+
+    if l >= order:
+        return query(tree, node * 2, start, (start + end) // 2, order)
+    else:
+        return query(tree, node * 2 + 1, (start + end) // 2 + 1, end, order - l)
+
+
+n = int(input())
+N = 2000000
+a = [0] * (N + 1)
+tree_size = 4200000
+tree = [0] * tree_size
+
+for _ in range(n):
+    w, b = list(map(int, input().split()))
+    if w == 1:
+        update(a, tree, 1, 1, N, b, 1)
+    else:
+        print(query(tree, 1, 1, N, b))
