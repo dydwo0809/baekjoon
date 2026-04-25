@@ -1,0 +1,73 @@
+def cross(x1, y1, x2, y2, x3, y3, x4, y4):
+    if x1 == x2:
+        x = x1
+        y = (y4 - y3) * (x - x3) / (x4 - x3) + y3
+
+    elif x3 == x4:
+        x = x3
+        y = (y2 - y1) * (x - x1) / (x2 - x1) + y1
+
+    else:
+        x = ((y4 - y3) * x3 / (x4 - x3) - (y2 - y1) * x1 / (x2 - x1) + y1 - y3) / ((y4 - y3) / (x4 - x3) - (y2 - y1) / (x2 - x1))
+        y = (y2 - y1) * (x - x1) / (x2 - x1) + y1
+
+    return x, y
+
+
+def check(x, y, x1, y1, x2, y2, x3, y3, x4, y4 ):
+    if not min(x1, x2) - 0.0000001 <= x <= max(x1, x2) + 0.0000001:
+        return 0
+    if not min(x3, x4) - 0.0000001 <= x <= max(x3, x4) + 0.0000001:
+        return 0
+    if not min(y1, y2) - 0.0000001 <= y <= max(y1, y2) + 0.0000001:
+        return 0
+    if not min(y3, y4) - 0.0000001 <= y <= max(y3, y4) + 0.0000001:
+        return 0
+    return 1
+
+
+x1, y1, x2, y2 = map(int, input().split())
+x3, y3, x4, y4 = map(int, input().split())
+
+if x1 == x2 and x3 == x4:
+    if x1 == x3:
+        if max(y1, y2) < min(y3, y4):
+            print(0)
+        elif max(y3, y4) < min(y1, y2):
+            print(0)
+        else:
+            print(1)
+            ys = [y1, y2, y3, y4]
+            ys.sort()
+            temp1 = ys[1]
+            temp2 = ys[2]
+            if temp1 == temp2:
+                print(x1, temp1)
+
+    else:
+        print(0)
+
+elif (y2 - y1) * (x4 - x3) == (y4 - y3) * (x2 - x1):
+    if (y3 - y1) * (x2 - x1) == (y2 - y1) * (x3 - x1):
+        if max(x1, x2) < min(x3, x4):
+            print(0)
+        elif max(x3, x4) < min(x1, x2):
+            print(0)
+        else:
+            print(1)
+            points = [(x1, y1), (x2, y2), (x3, y3), (x4, y4)]
+            points.sort(key=lambda a: a[0])
+            temp1 = points[1]
+            temp2 = points[2]
+            if temp1 == temp2:
+                print(temp1[0], temp1[1])
+
+    else:
+        print(0)
+
+else:
+    x, y = cross(x1, y1, x2, y2, x3, y3, x4, y4)
+    answer = check(x, y, x1, y1, x2, y2, x3, y3, x4, y4)
+    print(answer)
+    if answer == 1:
+        print(x, y)
