@@ -1,0 +1,73 @@
+import sys
+
+input = sys.stdin.readline
+
+N = 2000000
+eratos = [i for i in range(N + 1)]
+for i in range(2, int((N + 1) ** 0.5) + 1):
+    if eratos[i] == i:
+        for j in range(2 * i, N, i):
+            if eratos[j] == j:
+                eratos[j] = i
+
+t = int(input())
+for tt in range(t):
+    a, b, c, d = map(int, input().split())
+    x = []
+    if d == 0:
+        x1 = 0
+        x.append(x1)
+
+        D = b ** 2 - 4 * a * c
+        if D == 0:
+            x2 = -b / (2 * a)
+            if abs(x1 - x2) > 0.0001:
+                x.append(x2)
+        if D > 0:
+            x2, x3 = (-b + D ** (1 / 2)) / (2 * a), (-b - D ** (1 / 2)) / (2 * a)
+            if abs(x1 - x2) > 0.0001:
+                x.append(x2)
+            if abs(x1 - x3) > 0.0001 and abs(x2 - x3) > 0.0001:
+                x.append(x3)
+
+    else:
+        f = {}  # 소인수분해
+        n = abs(d)
+        while n != 1:
+            temp = eratos[n]
+            if temp in f:
+                f[temp] += 1
+            else:
+                f[temp] = 1
+            n //= eratos[n]
+
+        factor = [1, -1]  # 약수(음수 포함)
+        for i in f:
+            temp = factor[:]
+            m = 1
+            for j in range(f[i]):
+                m *= i
+                for k in temp:
+                    factor.append(k * m)
+
+        for i in factor:
+            if a * i ** 3 + b * i ** 2 + c * i + d == 0:
+                x1 = i
+                x.append(x1)
+                break
+
+        a, b, c = a, a * x1 + b, a * x1 ** 2 + b * x1 + c
+        D = b ** 2 - 4 * a * c
+        if D == 0:
+            x2 = -b / (2 * a)
+            if abs(x1 - x2) > 0.0001:
+                x.append(x2)
+        if D > 0:
+            x2, x3 = (-b + D ** (1 / 2)) / (2 * a), (-b - D ** (1 / 2)) / (2 * a)
+            if abs(x1 - x2) > 0.0001:
+                x.append(x2)
+            if abs(x1 - x3) > 0.0001 and abs(x2 - x3) > 0.0001:
+                x.append(x3)
+
+    x.sort()
+    print(" ".join(map(str, x)))
