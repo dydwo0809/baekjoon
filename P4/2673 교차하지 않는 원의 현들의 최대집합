@@ -1,0 +1,59 @@
+import sys
+input = sys.stdin.readline
+
+
+def cross(se, i, j):
+    if se[i][0] < se[j][0]:
+        s1, e1 = se[i]
+        s2, e2 = se[j]
+    else:
+        s1, e1 = se[j]
+        s2, e2 = se[i]
+    if s2 < e1 < e2:
+        return True
+    return False
+
+
+n = int(input())
+se = []
+for i in range(n):
+    s, e = map(int, input().split())
+    if s > e:
+        s, e = e, s
+    se.append([s, e])
+
+graph = [[0] * n for i in range(n)]
+for i in range(n - 1):
+    graph[i][i] = 1
+    for j in range(i + 1, n):
+        if cross(se, i, j):
+            graph[i][j] = 1
+            graph[j][i] = 1
+graph[n - 1][n - 1] = 1
+
+impossible = [0] * n
+
+
+def dfs(i, depth):
+    global answer
+    if depth > answer:
+        answer = depth
+    temp = []
+    for j in range(n):
+        if graph[i][j] == 1:
+            if impossible[j] == 0:
+                temp.append(j)
+                impossible[j] = 1
+
+    for j in range(i + 1, n):
+        if impossible[j] == 0:
+            dfs(j, depth + 1)
+
+    for j in temp:
+        impossible[j] = 0
+
+
+answer = 0
+for i in range(n):
+    dfs(i, 1)
+print(answer)
