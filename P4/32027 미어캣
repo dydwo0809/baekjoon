@@ -1,0 +1,113 @@
+import sys
+input = sys.stdin.readline
+
+
+def count(place, temp, v):
+    result = 1
+    for i in range(v):
+        if place[i] == "L" and temp[i] > 0:
+            result += 1
+
+    for i in range(v + 1, n):
+        if place[i] == "R" and temp[i] > 0:
+            result += 1
+
+    return result
+
+
+def guess(v, n, place, R, L, len_r, len_l, high, num_r, num_l):
+    if place[v] != high:
+        return 0
+
+    temp = [0] * n
+    r_min = 0
+    l_min = 0
+    r_max = len_r - 1
+    l_max = len_l - 1
+    if high == "R":
+        temp[v] = R[r_max]
+        r_max -= 1
+    else:
+        temp[v] = L[l_max]
+        l_max -= 1
+
+    left_r = num_r[v] - 1
+    right_l = num_l[n] - num_l[v + 1] - 1
+
+    for i in range(v + 1, n):
+        if place[i] == "L":
+            right_l -= 1
+            continue
+
+        if right_l < 0:
+            temp[i] = R[r_max]
+            r_max -= 1
+        else:
+            if R[r_max] > L[right_l]:
+                temp[i] = R[r_max]
+                r_max -= 1
+
+    for index in range(v):
+        i = v - index - 1
+        if place[i] == "R":
+            left_r -= 1
+            continue
+
+        if left_r < 0:
+            temp[i] = L[l_max]
+            l_max -= 1
+        else:
+            if L[l_max] > R[left_r]:
+                temp[i] = L[l_max]
+                l_max -= 1
+
+    return count(place, temp, v)
+
+
+n = int(input())
+place = []
+R = []
+L = []
+for i in range(n):
+    h, dir = map(str, input().split())
+    h = int(h)
+    place.append(dir)
+    if dir == "R":
+        R.append(h)
+    else:
+        L.append(h)
+
+len_r = len(R)
+len_l = len(L)
+
+if len_r == 0 or len_l == 0:
+    print(n)
+    exit(0)
+
+R.sort()
+L.sort()
+
+if R[-1] > L[-1]:
+    high = "R"
+else:
+    high = "L"
+
+num_r = [0] * (n + 1)
+num_l = [0] * (n + 1)
+
+for i in range(n):
+    num_r[i + 1] = num_r[i]
+    num_l[i + 1] = num_l[i]
+    if place[i] == "R":
+        num_r[i + 1] += 1
+    else:
+        num_l[i + 1] += 1
+
+
+answer = 0
+for v in range(n):
+    temp = guess(v, n, place, R, L, len_r, len_l, high, num_r, num_l)
+    if temp > answer:
+        answer = temp
+
+print(answer)
