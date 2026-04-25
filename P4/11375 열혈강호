@@ -1,0 +1,32 @@
+import sys
+
+sys.setrecursionlimit(10001)
+input = sys.stdin.readline
+
+
+def dfs(v):
+    for nv in graph[v]:
+        if visit[nv] == 1:
+            continue
+        visit[nv] = 1
+        if match[nv] == -1 or dfs(match[nv]):
+            match[nv] = v
+            return True
+
+    return False
+
+
+n, m = map(int, input().split())
+graph = []
+for i in range(n):
+    k, *w = map(int, input().split())
+    graph.append(w)
+
+match = [-1] * (m + 1)
+answer = 0
+for i in range(n):
+    visit = [0] * (m + 1)
+    if dfs(i):
+        answer += 1
+
+print(answer)
