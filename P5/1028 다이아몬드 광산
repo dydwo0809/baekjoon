@@ -1,0 +1,51 @@
+import sys
+input = sys.stdin.readline
+
+
+def check(x, y):
+    if not (0 <= x < n and 0 <= y < r):
+        return False
+    if m[x][y] == "0":
+        return False
+    return True
+
+
+def step(x, y):
+    global answer
+    x1 = x - 1
+    y1 = y - 1
+    x2 = x - 1
+    y2 = y + 1
+    if check(x1, y1):
+        l_dia[x][y] = l_dia[x1][y1] + 1
+    if check(x2, y2):
+        r_dia[x][y] = r_dia[x2][y2] + 1
+    l = 2
+    while check(x1, y1) and check(x2, y2):
+        if r_dia[x1][y1] >= l and l_dia[x2][y2] >= l:
+            dp[x][y] = l
+        x1 -= 1
+        y1 -= 1
+        x2 -= 1
+        y2 += 1
+        l += 1
+
+
+n, r = map(int, input().split())
+m = [input().strip() for i in range(n)]
+l_dia = [[0] * r for i in range(n)]
+r_dia = [[0] * r for i in range(n)]
+dp = [[0] * r for i in range(n)]
+
+answer = 0
+for i in range(n):
+    for j in range(r):
+        if m[i][j] == "1":
+            l_dia[i][j] = 1
+            r_dia[i][j] = 1
+            dp[i][j] = 1
+            step(i, j)
+            if dp[i][j] > answer:
+                answer = dp[i][j]
+
+print(answer)
