@@ -1,0 +1,65 @@
+import sys
+input = sys.stdin.readline
+
+
+def find(count, prev):
+    index = -1
+    m = 0
+    for i in range(10):
+        if i == prev:
+            continue
+        if count[i] > m:
+            index = i
+            m = count[i]
+
+    return index
+
+
+def max_index(count, prev):
+    index = -1
+    for i in range(10):
+        if i == prev:
+            continue
+        if count[i] > 0:
+            index = i
+
+    return index
+
+
+count = list(map(int, input().split()))
+total = sum(count)
+
+m = max(count)
+index = count.index(m)
+
+possible = total // 2 + total % 2
+if m > possible:
+    d = m - possible
+    count[index] -= (2 * d - 1 + total % 2)
+    total -= (2 * d - 1 + total % 2)
+
+if total % 2 == 1:
+    if count[0] == total // 2 + 1:
+        count[0] -= 1
+        total -= 1
+
+answer = "0"
+for t in range(total):
+    m = max(count)
+    index = find(count, int(answer[-1]))
+    if total % 2 == 1:
+        if m == total // 2 + 1:
+            answer += str(index)
+            count[index] -= 1
+        else:
+            index = max_index(count, int(answer[-1]))
+            answer += str(index)
+            count[index] -= 1
+    else:
+        index = max_index(count, int(answer[-1]))
+        answer += str(index)
+        count[index] -= 1
+
+    total -= 1
+
+print(int(answer))
