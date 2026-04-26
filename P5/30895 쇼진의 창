@@ -1,0 +1,40 @@
+import sys
+input = sys.stdin.readline
+
+
+def count(amount, m):
+    if m % amount == 0:
+        return m // amount
+    else:
+        return m // amount + 1
+
+
+def efficiency(x, y, m):
+    plain = count(x, m)
+    shojin = count(x + y, m)
+    return plain / shojin
+
+
+x, y, k = map(int, input().split())
+
+temp = k % (x + y)
+if temp == 0:
+    temp = x + y
+
+if temp == 1:
+    M = k
+else:
+    M = k + (x + y - temp) + 1
+answer = k
+m = efficiency(x, y, k)
+for i in range(10 ** 6):
+    if M < k:
+        M += (x + y)
+        continue
+    current_eff = efficiency(x, y, M)
+    if current_eff < m:
+        m = current_eff
+        answer = M
+    M += x + y
+
+print(answer)
