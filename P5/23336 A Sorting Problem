@@ -1,0 +1,51 @@
+import sys
+input = sys.stdin.readline
+import math
+
+
+def makeSeg(seg, index, s, e, i):
+    seg[i] = [s, e, 0]
+    if s == e:
+        index[s] = i
+        return
+    temp = (s + e) // 2
+    makeSeg(seg, index, s, temp, 2 * i)
+    makeSeg(seg, index, temp + 1, e, 2 * i + 1)
+
+
+def addSeg(seg, index, i):
+    i = index[i]
+    delta = 1
+    while i > 0:
+        seg[i][2] += delta
+        i //= 2
+
+
+def query(seg, s, e, i):
+    if s == seg[i][0] and e == seg[i][1]:
+        return seg[i][2]
+    temp = (seg[i][0] + seg[i][1]) // 2
+    if e <= temp:
+        return query(seg, s, e, 2 * i)
+    if s > temp:
+        return query(seg, s, e, 2 * i + 1)
+    return query(seg, s, temp, 2 * i) + query(seg, temp + 1, e, 2 * i + 1)
+
+
+n = int(input())
+
+temp = math.ceil(math.log2(n)) + 1
+seg = [[] for i in range(2 ** temp)]
+index = [0] * (n + 1)
+makeSeg(seg, index, 1, n, 1)
+
+nums = list(map(int, input().split()))
+
+answer = 0
+for num in nums:
+    i = num - 1
+    addSeg(seg, index, i)
+    if i != n:
+        answer += query(seg, num, n, 1)
+
+print(answer)
