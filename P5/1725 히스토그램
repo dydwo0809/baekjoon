@@ -1,0 +1,29 @@
+import sys
+inout = sys.stdin.readline
+
+n = int(input())
+nums = []
+for i in range(n):
+    nums.append(int(input()))
+
+a = [0] * n
+stack = []
+for i in range(n):
+    if not stack:
+        stack.append([0, -1])
+    num = nums[i]
+    if num < stack[-1][0]:
+        while stack and num < stack[-1][0]:
+            h, index = stack.pop()
+            a[index] = h * (i - stack[-1][1] - 1)
+    stack.append([num, i])
+
+end = stack[-1][1]
+while stack:
+    h, index = stack.pop()
+    if len(stack) == 1:
+        a[index] = h * (end + 1)
+        break
+    a[index] = h * (end - index + 1)
+
+print(max(a))
