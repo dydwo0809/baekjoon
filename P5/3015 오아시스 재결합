@@ -1,0 +1,25 @@
+import sys
+input = sys.stdin.readline
+
+n = int(input())
+stack = []
+answer = 0
+for i in range(n):
+    num = int(input())
+    if stack:
+        while stack and num > stack[-1][0]:
+            temp = stack.pop()
+            answer += temp[1]
+        if stack:
+            if stack[-1][0] == num:
+                answer += stack[-1][1]
+            if stack[0][0] != num:
+                answer += 1
+
+    if stack:
+        if stack[-1][0] == num:
+            stack[-1][1] += 1
+            continue
+    stack.append([num, 1])
+
+print(answer)
