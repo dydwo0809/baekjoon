@@ -1,0 +1,60 @@
+import sys
+
+input = sys.stdin.readline
+sys.setrecursionlimit(100002)
+
+
+def init(a, tree, node, start, end):
+    if start == end:
+        tree[node] = [a[start], start]
+    else:
+        init(a, tree, node * 2, start, (start + end) // 2)
+        init(a, tree, node * 2 + 1, (start + end) // 2 + 1, end)
+
+        m1, i1 = tree[node * 2]
+        m2, i2 = tree[node * 2 + 1]
+        if m1 <= m2:
+            tree[node] = [m1, i1]
+        else:
+            tree[node] = [m2, i2]
+
+
+def query(tree, node, start, end, left, right):
+    if left > end or right < start:
+        return [1000000001, 0]
+    if left <= start and end <= right:
+        return tree[node]
+    m1, i1 = query(tree, node * 2, start, (start + end) // 2, left, right)
+    m2, i2 = query(tree, node * 2 + 1, (start + end) // 2 + 1, end, left, right)
+
+    if m1 <= m2:
+        return [m1, i1]
+    else:
+        return [m2, i2]
+
+
+def hist(a, tree, left, right):
+    global answer
+    if left > right:
+        return
+    if left == right:
+        temp = a[left]
+        answer = max(answer, temp)
+        return
+    m, i = query(tree, 1, 0, n - 1, left, right)
+    temp = (right - left + 1) * m
+    if answer < temp:
+        answer = temp
+    answer = max(answer, temp)
+    hist(a, tree, left, i - 1)
+    hist(a, tree, i + 1, right)
+
+
+answer = 0
+n = int(input())
+a = list(map(int, input().split()))
+tree_size = 4 * n
+tree = [0] * tree_size
+init(a, tree, 1, 0, n - 1)
+hist(a, tree, 0, n - 1)
+print(answer)
