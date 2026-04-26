@@ -1,0 +1,31 @@
+import sys
+
+input = sys.stdin.readline
+from bisect import bisect_left
+
+n = int(input())
+
+A = list(map(int, input().split()))
+B = list(map(int, input().split()))
+
+temp = {}
+for i in range(n):
+    temp[A[i]] = i + 1
+
+nums = [0]
+for i in B:
+    nums.append(temp[i])
+
+top = [0]
+answer = 0
+for i in range(1, n + 1):
+    num = nums[i]
+    if num > top[-1]:
+        top.append(num)
+        answer += 1
+    else:
+        j = bisect_left(top, num)
+        top[j] = num
+
+print(answer)
+
