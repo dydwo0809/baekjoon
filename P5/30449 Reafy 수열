@@ -1,0 +1,76 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+typedef long long ll;
+
+
+struct cmp{
+    bool operator()(pair<int, int> a, pair<int, int> b){
+        return a.first * b.second - a.second * b.first > 0;
+    }
+};
+
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(0);
+    cout.tie(0);
+
+    int n, k;
+    cin >> n >> k;
+
+    if (k == 1){
+        cout << 0 << " " << 1;
+        exit(0);
+    }
+
+    vector<pair<int, int>> memo; 
+    memo.push_back({0, 1});
+
+    priority_queue<pair<int, int>, vector<pair<int, int>>, cmp> pq;
+
+    for (int i = 1; i < n + 1; i ++){
+        pq.push({1, i});
+    }
+
+    pair<int, int> prev = {0, 1};
+    
+    int cnt = 1;
+    int a, b;
+    while (!pq.empty()){
+        pair<int, int> temp = pq.top();
+        pq.pop();
+        a = temp.first;
+        b = temp.second;
+        
+        if (a * prev.second != b * prev.first){
+            prev.first = a;
+            prev.second = b;
+            cnt++;
+            if (cnt == k){
+                int g = gcd(a, b);
+                cout << a / g << " " << b / g;
+                break;
+            }
+            if (2 * a == b) {
+                k--;
+                cnt--;
+                // cout << "k: " << k << endl;
+                // cout << "cnt: " << cnt << endl;
+                int target = cnt * 2 - k;
+                // cout << "2 * cnt - k: " << target << endl;
+                pair<int, int> result = memo[target];
+                a = result.second - result.first;
+                b = result.second;
+                int g = gcd(a, b);
+                cout << a / g << " " << b / g;
+                break;
+            }
+            memo.push_back({a, b});    
+        }
+        a++;
+        if (a < b) pq.push({a, b});
+    }
+
+   return 0;
+}
