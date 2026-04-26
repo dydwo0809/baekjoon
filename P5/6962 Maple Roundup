@@ -1,0 +1,93 @@
+import sys
+input = sys.stdin.readline
+import math
+
+
+def dist2(p1, p2):
+    return (p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2
+
+
+def ccw(v1, v2):
+    return v1[0] * v2[1] - v1[1] * v2[0]
+
+
+def ccwP(p1, p2, p3):
+    v1 = [p2[0] - p1[0], p2[1] - p1[1]]
+    v2 = [p3[0] - p1[0], p3[1] - p1[1]]
+    return ccw(v1, v2)
+
+
+def convexHull(points):
+    points.sort(key=lambda x: (x[0], x[1]))
+    x0, y0 = points[0]
+    slope = []
+    for i in range(1, len(points)):
+        x, y = points[i]
+        if x == x0:
+            slope.append([i, 90])
+        else:
+            temp = math.degrees(math.atan((y - y0) / (x - x0)))
+            slope.append([i, temp])
+    slope.sort(key=lambda x: x[1])
+    slope.append([0, 0])
+    stack = []
+    stack.append([x0, y0])
+    stack.append(points[slope[0][0]])
+    for i, dummy in slope:
+        x, y = points[i]
+        p1 = stack[-2]
+        p2 = stack[-1]
+        v1 = p2[0] - p1[0], p2[1] - p1[1]
+        v2 = x - p1[0], y - p1[1]
+        c = ccw(v1, v2)
+        while c <= 0:
+            stack.pop()
+            if len(stack) == 1:
+                break
+            p1 = stack[-2]
+            p2 = stack[-1]
+            v1 = p2[0] - p1[0], p2[1] - p1[1]
+            v2 = x - p1[0], y - p1[1]
+            c = ccw(v1, v2)
+        stack.append([x, y])
+    stack.pop()
+    return stack
+
+
+t = int(input())
+for tt in range(t):
+    n = int(input())
+    points = []
+    for i in range(n):
+        points.append(list(map(int, input().split())))
+
+    ch = convexHull(points)
+    l = len(ch)
+    if l == 1:
+        p1 = points[0]
+        p2 = points[-1]
+        answer = 2 * dist2(p1, p2) ** (1/2)
+        print("%.2f" % answer)
+        continue
+    p1 = ch[0]
+    temp = []
+    p2 = ch.pop()
+    temp.append(p2)
+    while True:
+        p3 = ch.pop()
+        c = ccwP(p1, p2, p3)
+        if c == 0:
+            temp.append(p3)
+        else:
+            ch.append(p3)
+            break
+
+    ch += temp
+
+    answer = 0
+    for i in range(l):
+        p1 = ch[i]
+        p2 = ch[(i + 1) % l]
+        d = dist2(p1, p2) ** (1/2)
+        answer += d
+    print("%.2f" % answer)
