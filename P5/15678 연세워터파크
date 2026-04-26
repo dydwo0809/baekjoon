@@ -1,0 +1,26 @@
+import sys
+input = sys.stdin.readline
+from collections import deque
+
+n, d = map(int, input().split())
+nums = list(map(int, input().split()))
+
+answer = []
+deq = deque()
+for i in range(n):
+    num = nums[i]
+    if len(deq) == 0:
+        deq.append([i, num])
+        answer.append(num)
+    else:
+        if deq[0][0] < i - d:
+            deq.popleft()
+        m = max(deq[0][1] + num, num)
+        answer.append(m)
+        while len(deq) > 0 and deq[-1][1] < m:
+            deq.pop()
+        deq.append([i, m])
+
+ans = max(answer)
+
+print(ans)
