@@ -1,0 +1,46 @@
+import sys
+input = sys.stdin.readline
+
+
+def binarySearch(m, num):
+    s = 0
+    e = len(m) - 1
+    while s <= e:
+        mid = (s + e) // 2
+        if m[mid] == num:
+            return mid - 1
+        elif m[mid] > num:
+            e = mid - 1
+        else:
+            s = mid + 1
+
+    return (s + e) // 2
+
+
+n = int(input())
+nums = [-1000000001] + list(map(int, input().split()))
+lis = [0] * (n + 1)
+m = [-1000000001]
+for i in range(1, n + 1):
+    num = nums[i]
+    if num > m[len(m) - 1]:
+        lis[i] = len(m)
+        m.append(num)
+    else:
+        index = binarySearch(m, num) + 1
+        lis[i] = index
+        m[index] = num
+
+l = len(m) - 1
+curr = 1000000001
+answer = []
+for i in range(n):
+    index = n - i
+    if lis[index] == l and nums[index] < curr:
+        answer.append(nums[index])
+        l -= 1
+        curr = nums[index]
+
+answer.reverse()
+print(len(answer))
+print(*answer)
