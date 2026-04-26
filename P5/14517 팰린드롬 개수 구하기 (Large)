@@ -1,0 +1,40 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+typedef vector<vector<int>> matrix;
+
+constexpr int mod = 10007;
+
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    string s;
+    cin >> s;
+
+    int l = s.length();
+    matrix dp(l, vector<int>(l));
+
+    for (int i = 0; i < l; i++) {
+        dp[i][i] = 1;
+    }
+    for (int i = 0; i < l - 1; i++) {
+        if (s[i] == s[i + 1]) dp[i][i + 1] = 3;
+        else dp[i][i + 1] = 2;
+    }
+
+    int x, y;
+    for (int i = 2; i < l; i++) {
+        x = 0;
+        y = i;
+        for (int j = 0; j < l - i; j++) {
+            if (s[x] == s[y]) dp[x][y] = dp[x][y - 1] + dp[x + 1][y] + 1;
+            else dp[x][y] = dp[x][y - 1] + dp[x + 1][y] - dp[x + 1][y - 1];
+            dp[x][y] = (dp[x][y] + mod) % mod;
+            x ++; y++;
+        }
+    }
+    cout << dp[0][l - 1] << "\n";
+}
