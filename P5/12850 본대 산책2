@@ -1,0 +1,53 @@
+def mat_multiply(mat1, mat2):
+    a = 8
+    b = 8
+    answer = []
+    for i in range(a):
+        temp_list = []
+        for j in range(a):
+            temp = 0
+            for k in range(b):
+                temp += mat1[i][k] * mat2[k][j] % 1000000007
+            temp_list.append(temp % 1000000007)
+        answer.append(temp_list)
+    return answer
+
+
+def mat_pow(mat, n):
+    mat_temp = []
+    for i in mat:
+        mat_temp.append(i[:])
+
+    answer = []
+    for i in range(8):
+        temp = []
+        for j in range(8):
+            if i == j:
+                temp.append(1)
+            else:
+                temp.append(0)
+        answer.append(temp)
+
+    while n:
+        if n % 2 == 1:
+            answer = mat_multiply(answer, mat_temp)
+        n //= 2
+        mat_temp = mat_multiply(mat_temp, mat_temp)
+
+    return answer
+
+
+g = [
+    [0, 1, 1, 0, 0, 0, 0, 0],
+    [1, 0, 1, 1, 0, 0, 0, 0],
+    [1, 1, 0, 1, 1, 0, 0, 0],
+    [0, 1, 1, 0, 1, 1, 0, 0],
+    [0, 0, 1, 1, 0, 1, 1, 0],
+    [0, 0, 0, 1, 1, 0, 0, 1],
+    [0, 0, 0, 0, 1, 0, 0, 1],
+    [0, 0, 0, 0, 0, 1, 1, 0]
+]
+
+n = int(input())
+G = mat_pow(g, n)
+print(G[0][0])
