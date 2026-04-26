@@ -1,0 +1,19 @@
+import sys
+
+input = sys.stdin.readline
+
+q, m = map(int, input().split())
+music = [0]
+a, b = 0, 1
+p = 0
+while True:
+    a, b = b, (a + b) % m
+    for i in str(a):
+        music.append(int(i))
+        p += 1
+    if a == 0 and b == 1 and p != 0:
+        break
+
+for i in range(q):
+    n = int(input())
+    print(music[n % p])
