@@ -1,0 +1,40 @@
+import sys
+from collections import deque
+
+input = sys.stdin.readline
+
+
+def check(v, d):
+    if 0 <= v <= 500000 and visit[v][d % 2] < 0:
+        return True
+    else:
+        return False
+
+
+n, k = map(int, input().split())
+visit = [[-1] * 2 for i in range(500001)]
+q = deque()
+visit[n][0] = 0
+q.append([n, 0])
+while q:
+    v, order = q.popleft()
+    for nv in [v - 1, v + 1, v * 2]:
+        if check(nv, order + 1):
+            visit[nv][(order + 1) % 2] = order + 1
+            q.append([nv, order + 1])
+
+answer = 500001
+bro = k
+d = 0
+while bro <= 500000:
+    if (visit[bro][d % 2] >= 0) and (d >= visit[bro][d % 2]):
+        if d < answer:
+            answer = d
+            break
+    d += 1
+    bro += d
+
+if answer > 500000:
+    answer = -1
+
+print(answer)
