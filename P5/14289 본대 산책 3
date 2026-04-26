@@ -1,0 +1,63 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+typedef long long ll;
+typedef vector<vector<ll>> mat;
+
+ll mod = 1000000007;
+
+
+mat mat_mul(mat& A, mat& B){
+    int a = A.size();
+    int b = B.size();
+
+    mat result(a, vector<ll>(b));
+
+    for (int i = 0; i < a; i++){
+        for (int j = 0; j < a; j++){
+            for (int k = 0; k < b; k++){
+                result[i][j] += A[i][k] * B[k][j];
+                result[i][j] %= mod;
+            }
+        }
+    }
+    return result;
+}
+
+
+mat mat_pow(mat &m, int n) {
+    if (n == 1) return m;
+
+    if (n % 2 == 1) {
+        mat temp = mat_pow(m, n - 1);
+        return mat_mul(temp, m);
+    }
+    else {
+        mat half = mat_pow(m, n / 2);
+        return mat_mul(half, half);
+    }
+}
+
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int n, m;
+    cin >> n >> m;
+
+    mat g(n + 1, vector<ll>(n + 1));
+    ll a, b;
+    for (int i = 0; i < m; i++) {
+        cin >> a >> b;
+        g[a][b] = 1;
+        g[b][a] = 1;
+    }
+
+    int d;
+    cin >> d;
+
+    mat G = mat_pow(g, d);
+    cout << G[1][1] << "\n";
+}
