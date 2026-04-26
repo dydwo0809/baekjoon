@@ -1,0 +1,52 @@
+import sys
+input = sys.stdin.readline
+
+n = int(input())
+nums = list(map(int, input().split()))
+
+k1 = 0
+p, q = 0, 0
+k2 = 0
+
+
+def isUp(a, b):
+    if a == n:
+        return b == 1
+    return a + 1 == b
+
+
+def isDown(a, b):
+    if a == 1:
+        return b == n
+    return a - 1 == b
+
+
+for i in range(n):
+    if not isDown(nums[(i - 1) % n], nums[i]) and isDown(nums[i], nums[(i + 1) % n]):
+        k2 = n - i
+        p = i + 1
+    if isDown(nums[(i - 1) % n], nums[i]) and not isDown(nums[i], nums[(i + 1) % n]):
+        q = i + 1
+
+if k2 == 0:
+    k2 = 1
+    p = 1
+    q = n
+else:
+    q -= p - 1
+    q %= n
+    p = 1
+
+nums = nums[n - k2:] + nums[:n - k2]
+
+nums = nums[:q][::-1] + nums[q:]
+
+for i in range(n):
+    if nums[i] == 1:
+        k1 = n - i
+
+nums = nums[n - k1:] + nums[:n - k1]
+
+print(k1)
+print(p, q)
+print(k2)
