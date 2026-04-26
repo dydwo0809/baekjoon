@@ -1,0 +1,45 @@
+import sys
+input = sys.stdin.readline
+import heapq
+
+n = int(input())
+points = []
+for i in range(n):
+    points.append([i] + list(map(int, input().split())))
+
+heap = []
+
+for i in range(1, 4):
+    points.sort(key=lambda x: x[i])
+
+    for j in range(n - 1):
+        pass
+        dist = points[j + 1][i] - points[j][i]
+        heapq.heappush(heap, [dist, points[j][0], points[j + 1][0]])
+
+
+def find(i):
+    if head[i] != i:
+        head[i] = find(head[i])
+    return head[i]
+
+
+def union(a, b):
+    a = find(a)
+    b = find(b)
+    if a > b:
+        a, b = b, a
+    head[b] = head[a]
+
+
+answer = 0
+head = [i for i in range(n)]
+while heap:
+    dist, a, b = heapq.heappop(heap)
+
+    if find(a) == find(b):
+        continue
+    union(a, b)
+    answer += dist
+
+print(answer)
