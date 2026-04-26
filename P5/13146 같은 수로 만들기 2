@@ -1,0 +1,39 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+typedef long long ll;
+
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int n;
+    cin >> n;
+
+    stack<ll> stack;
+    ll num;
+    cin >> num;
+    stack.push(num);
+
+    ll answer = 0;
+    for (int i = 0; i < n - 1; i++) {
+        cin >> num;
+        if (stack.top() <= num) {
+            answer += (num - stack.top());
+            while (!stack.empty() and stack.top() <= num) stack.pop();
+        }
+        stack.push(num);
+    }
+
+    if (stack.size() >= 2) {
+        ll m = stack.top();
+        int s = stack.size();
+        for (int i = 0; i < s - 1; i++) stack.pop();
+        ll M = stack.top();
+        answer += M - m;
+    }
+
+    cout << answer << "\n";
+}
